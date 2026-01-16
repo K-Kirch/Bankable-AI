@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyzing... — Bankable.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="page centered">
+        <div class="analysis-container">
+            <!-- Spinner -->
+            <div class="analysis-spinner"></div>
+
+            <h2>Analyzing Your Data</h2>
+            <p id="statusMessage">Our AI agents are evaluating your financials...</p>
+
+            <!-- Agent Status -->
+            <div class="agent-status">
+                <div class="agent-item" id="agent-counter">
+                    <span class="agent-icon">🧮</span>
+                    <span class="agent-name">The Counter</span>
+                    <span class="agent-status-text" style="font-size: 0.75rem; color: var(--text-muted);">Financial
+                        health</span>
+                    <span class="agent-status-indicator" id="status-counter"></span>
+                </div>
+                <div class="agent-item" id="agent-lawyer">
+                    <span class="agent-icon">⚖️</span>
+                    <span class="agent-name">The Lawyer</span>
+                    <span class="agent-status-text" style="font-size: 0.75rem; color: var(--text-muted);">Legal
+                        analysis</span>
+                    <span class="agent-status-indicator" id="status-lawyer"></span>
+                </div>
+                <div class="agent-item" id="agent-forecaster">
+                    <span class="agent-icon">📈</span>
+                    <span class="agent-name">The Forecaster</span>
+                    <span class="agent-status-text" style="font-size: 0.75rem; color: var(--text-muted);">Growth
+                        modeling</span>
+                    <span class="agent-status-indicator" id="status-forecaster"></span>
+                </div>
+            </div>
+
+            <p style="margin-top: 2rem; font-size: 0.875rem; color: var(--text-muted);">
+                This usually takes 30-60 seconds...
+            </p>
+        </div>
+    </div>
+
+    <script src="/js/analyze.js"></script>
+</body>
+
+</html>

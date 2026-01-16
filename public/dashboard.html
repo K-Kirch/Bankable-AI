@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Score — Bankable.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="page">
+        <!-- Header -->
+        <header class="header">
+            <div class="container header-content">
+                <a href="/" class="logo">Bankable.ai</a>
+                <a href="/upload.html" class="btn btn-secondary">New Analysis</a>
+            </div>
+        </header>
+
+        <main class="container" style="padding: 2rem 1rem;">
+            <!-- Score Section -->
+            <section style="text-align: center; margin-bottom: 3rem;">
+                <h1 style="margin-bottom: 0.5rem;">Your Bankability Score</h1>
+                <p id="companyName" style="color: var(--text-secondary);">Company Name</p>
+
+                <!-- Score Gauge -->
+                <div class="score-gauge">
+                    <svg class="score-gauge-circle" viewBox="0 0 280 280">
+                        <defs>
+                            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#3b82f6" />
+                                <stop offset="100%" stop-color="#22c55e" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="score-gauge-bg" cx="140" cy="140" r="120" />
+                        <circle class="score-gauge-fill" id="scoreCircle" cx="140" cy="140" r="120" />
+                    </svg>
+                    <div class="score-gauge-content">
+                        <div class="score-value" id="scoreValue">--</div>
+                        <div class="score-label">out of 100</div>
+                        <div class="grade-badge" id="gradeBadge">-</div>
+                    </div>
+                </div>
+
+                <p id="scoreSummary" style="max-width: 500px; margin: 1rem auto 0; font-size: 0.875rem;">
+                    Loading score details...
+                </p>
+            </section>
+
+            <!-- Risk Factors -->
+            <section>
+                <h2 style="margin-bottom: 1rem;">Risk Factor Breakdown</h2>
+                <div class="risk-grid" id="riskGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Remediation Roadmap -->
+            <section style="margin-top: 3rem;">
+                <h2 style="margin-bottom: 0.5rem;">Remediation Roadmap</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Prioritized tasks to improve your score
+                </p>
+                <div class="task-list" id="taskList">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+
+</html>

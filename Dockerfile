@@ -28,6 +28,9 @@ RUN npm ci --omit=dev --legacy-peer-deps
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
+# Copy public folder for static assets
+COPY public ./public
+
 # Expose port (Cloud Run uses 8080)
 EXPOSE 8080
 

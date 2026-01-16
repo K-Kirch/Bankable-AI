@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Documents — Bankable.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="page">
+        <!-- Header -->
+        <header class="header">
+            <div class="container header-content">
+                <a href="/" class="logo">Bankable.ai</a>
+            </div>
+        </header>
+
+        <!-- Upload Form -->
+        <main class="container" style="max-width: 700px; padding-top: 3rem;">
+            <h1 style="text-align: center; margin-bottom: 0.5rem;">Upload Your Documents</h1>
+            <p style="text-align: center; margin-bottom: 2rem;">
+                Share your financial documents to get started with the analysis.
+            </p>
+
+            <form id="uploadForm" class="card">
+                <!-- Company Name -->
+                <div class="form-group">
+                    <label class="form-label" for="companyName">Company Name</label>
+                    <input type="text" id="companyName" class="form-input" placeholder="Enter your company name"
+                        required>
+                </div>
+
+                <!-- Document Upload -->
+                <div class="form-group">
+                    <label class="form-label">Financial Documents</label>
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-zone-icon">📄</div>
+                        <p class="upload-zone-text">
+                            <strong>Click to upload</strong> or drag and drop<br>
+                            P&L statements, contracts, bank statements (PDF)
+                        </p>
+                        <input type="file" id="fileInput" multiple accept=".pdf,.xlsx,.csv" style="display: none;">
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+
+                <!-- Optional: API Connections -->
+                <div class="form-group">
+                    <label class="form-label">Optional: Connect Data Sources</label>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-secondary" id="connectStripe" disabled>
+                            💳 Connect Stripe
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="connectPlaid" disabled>
+                            🏦 Connect Bank (Plaid)
+                        </button>
+                    </div>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                        Coming soon: Automatic data import from Stripe and Plaid.
+                    </p>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
+                    Analyze My Bankability →
+                </button>
+            </form>
+        </main>
+    </div>
+
+    <script src="/js/upload.js"></script>
+</body>
+
+</html>
