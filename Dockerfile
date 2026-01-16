@@ -6,11 +6,12 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install ALL dependencies (including dev for TypeScript)
 RUN npm ci
 
 # Copy source code
-COPY . .
+COPY tsconfig.json ./
+COPY src ./src
 
 # Build TypeScript
 RUN npm run build
@@ -27,7 +28,7 @@ RUN npm ci --omit=dev
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
-# Expose port
+# Expose port (Cloud Run uses 8080)
 EXPOSE 8080
 
 # Set environment
