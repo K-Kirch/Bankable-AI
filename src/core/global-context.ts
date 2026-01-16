@@ -2,7 +2,7 @@
  * Global Context Service
  * 
  * Manages shared state between all agents during analysis.
- * Uses Redis for real-time updates and PostgreSQL for persistence.
+ * Uses Redis for real-time updates if available, falls back to in-memory.
  */
 
 import { Redis } from 'ioredis';
@@ -19,12 +19,33 @@ import type {
 } from '../types/index.js';
 
 export class GlobalContextService {
-    private redis: Redis;
+    private redis: Redis | null = null;
     private context: GlobalContext | null = null;
     private subscribers: Map<string, (ctx: GlobalContext) => void> = new Map();
+    private inMemoryStore: Map<string, string> = new Map();
 
-    constructor(redisUrl: string = process.env.REDIS_URL || 'redis://localhost:6379') {
-        this.redis = new Redis(redisUrl);
+    constructor(redisUrl?: string) {
+        const url = redisUrl || process.env.REDIS_URL;
+
+        if (url) {
+            try {
+                this.redis = new Redis(url, {
+                    maxRetriesPerRequest: 1,
+                    retryStrategy: () => null, // Don't retry, fall back to in-memory
+                    lazyConnect: true,
+                });
+
+                this.redis.on('error', () => {
+                    console.warn('Redis connection failed, using in-memory storage');
+                    this.redis = null;
+                });
+            } catch {
+                console.warn('Redis not available, using in-memory storage');
+                this.redis = null;
+            }
+        } else {
+            console.info('No REDIS_URL configured, using in-memory storage');
+        }
     }
 
     /**
@@ -52,11 +73,10 @@ export class GlobalContextService {
      * Load an existing session
      */
     async loadSession(sessionId: string): Promise<GlobalContext | null> {
-        const data = await this.redis.get(`session:${sessionId}`);
+        const data = await this.get(`session:${sessionId}`);
         if (!data) return null;
 
         const parsed = JSON.parse(data);
-        // Restore Map from serialized format
         parsed.agentInsights = new Map(Object.entries(parsed.agentInsights || {}));
         parsed.startedAt = new Date(parsed.startedAt);
 
@@ -168,6 +188,8 @@ export class GlobalContextService {
      * Subscribe to real-time insight stream from other agents
      */
     async subscribeToInsights(callback: (agentId: AgentId, insight: AgentInsight) => void): Promise<void> {
+        if (!this.redis) return; // Skip if no Redis
+
         const subscriber = this.redis.duplicate();
         await subscriber.subscribe('insights');
 
@@ -182,12 +204,37 @@ export class GlobalContextService {
      * Clean up resources
      */
     async disconnect(): Promise<void> {
-        await this.redis.quit();
+        if (this.redis) {
+            await this.redis.quit();
+        }
     }
 
     // ============================================
     // PRIVATE METHODS
     // ============================================
+
+    private async get(key: string): Promise<string | null> {
+        if (this.redis) {
+            try {
+                return await this.redis.get(key);
+            } catch {
+                return this.inMemoryStore.get(key) || null;
+            }
+        }
+        return this.inMemoryStore.get(key) || null;
+    }
+
+    private async set(key: string, value: string): Promise<void> {
+        if (this.redis) {
+            try {
+                await this.redis.set(key, value, 'EX', 86400);
+                return;
+            } catch {
+                // Fall through to in-memory
+            }
+        }
+        this.inMemoryStore.set(key, value);
+    }
 
     private ensureSession(): void {
         if (!this.context) {
@@ -198,22 +245,25 @@ export class GlobalContextService {
     private async persist(): Promise<void> {
         if (!this.context) return;
 
-        // Convert Map to object for JSON serialization
         const serializable = {
             ...this.context,
             agentInsights: Object.fromEntries(this.context.agentInsights),
         };
 
-        await this.redis.set(
+        await this.set(
             `session:${this.context.sessionId}`,
-            JSON.stringify(serializable),
-            'EX',
-            86400 // 24 hour TTL
+            JSON.stringify(serializable)
         );
     }
 
     private async publishInsight(agentId: AgentId, insight: AgentInsight): Promise<void> {
-        await this.redis.publish('insights', JSON.stringify({ agentId, insight }));
+        if (this.redis) {
+            try {
+                await this.redis.publish('insights', JSON.stringify({ agentId, insight }));
+            } catch {
+                // Ignore publish errors
+            }
+        }
     }
 
     private notifySubscribers(): void {
