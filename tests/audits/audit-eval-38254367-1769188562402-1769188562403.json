@@ -1,0 +1,13 @@
+{
+  "sessionId": "eval-38254367-1769188562402",
+  "startedAt": "2026-01-23T17:16:02.402Z",
+  "exportedAt": "2026-01-23T17:16:02.404Z",
+  "summary": {
+    "totalCalls": 0,
+    "totalTokens": 0,
+    "totalLatencyMs": 0,
+    "averageLatencyMs": 0,
+    "byAgent": {}
+  },
+  "entries": []
+}

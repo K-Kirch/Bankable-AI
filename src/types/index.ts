@@ -152,6 +152,9 @@ export interface AgentInsight {
 
     /** LLM reasoning chain */
     reasoningChain: string;
+
+    /** Reference to the audit entry that produced this insight */
+    auditEntryId?: string;
 }
 
 export type InsightCategory =

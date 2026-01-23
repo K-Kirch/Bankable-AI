@@ -1,0 +1,63 @@
+﻿Starting single eval...
+Company: A/S HYDREMA PRODUKTION
+Expected: 74-84
+npx : Redis connection failed, 
+using in-memory storage
+At line:1 char:1
++ npx tsx 
+tests/scripts/simple-eval.ts 
+2>&1 | Out-File -FilePath 
+eval-o ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo          :  
+   NotSpecified: (Redis conne  
+  ctio...-memory storage:Str   
+ ing) [], RemoteException
+    + FullyQualifiedErrorId :  
+   NativeCommandError
+ 
+Context initialized, running agents...
+[Orchestrator] Reusing existing context with 3 documents
+[Audit] lawyer | full_analysis | 7607ms | 3964 tokens
+[Audit] forecaster | full_analysis | 10221ms | 4357 tokens
+[Audit] counter | full_analysis | 11216ms | 4207 tokens
+
+Actual Score: 64 (C)
+In Range: NO ÔÜá´©Å
+
+Insights:
+  [lawyer] Strong Customer Contract Security Due to Auto-Renewal Clauses (+20)
+  [lawyer] Supplier Contract Security is Moderate Due to Annual Term (+5)
+  [lawyer] Potential Compliance Gap: Missing Tax Filing Documentation and Insurance Certificates (-15)
+  [lawyer] Legal Structure Assessment Limited by Data Availability (-5)
+  [forecaster] Modest Revenue Growth Indicates Stable but Not Rapid Expansion (+5)
+  [forecaster] Significant Customer Concentration Creates Vulnerability (-20)
+  [forecaster] Moderate Resilience to Pessimistic Scenarios (+5)
+  [forecaster] Low Default Probability Due to Positive Cash Flow and Runway (+20)
+  [counter] Strong Debt Serviceability Trend (+25)
+  [counter] Consistent Revenue Growth (+15)
+  [counter] Revenue Concentration Risk Identified (-20)
+  [counter] Positive Cash Flow Indicated by Plaid Data (+10)
+
+Audit Trail: 3 entries
+Summary: {
+  "totalCalls": 3,
+  "totalTokens": 12528,
+  "totalLatencyMs": 29044,
+  "averageLatencyMs": 9681.333333333334,
+  "byAgent": {
+    "lawyer": {
+      "calls": 1,
+      "tokens": 3964
+    },
+    "forecaster": {
+      "calls": 1,
+      "tokens": 4357
+    },
+    "counter": {
+      "calls": 1,
+      "tokens": 4207
+    }
+  }
+}
