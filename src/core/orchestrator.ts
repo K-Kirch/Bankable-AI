@@ -75,8 +75,21 @@ export class AgentOrchestrator {
         score: BankabilityScore;
         roadmap: RemediationRoadmap;
     }> {
-        // Initialize session
-        const context = await this.contextService.createSession(companyId);
+        // Check if we already have a context with documents (from fixture injection)
+        let context: GlobalContext;
+        try {
+            const existingContext = this.contextService.getContext();
+            // Reuse existing context if it has documents loaded
+            if (existingContext.documents.length > 0) {
+                context = existingContext;
+                console.log(`[Orchestrator] Reusing existing context with ${context.documents.length} documents`);
+            } else {
+                context = await this.contextService.createSession(companyId);
+            }
+        } catch {
+            // No existing context, create new one
+            context = await this.contextService.createSession(companyId);
+        }
 
         this.state = {
             sessionId: context.sessionId,

@@ -1,0 +1,178 @@
+{
+    "company": {
+        "name": "Murermester K ApS",
+        "cvr": "38254367",
+        "industry": "Construction / Masonry",
+        "founded": "2016",
+        "employees": 12,
+        "description": "Small masonry and general contracting company"
+    },
+    "documents": {
+        "profit_and_loss": {
+            "2024": {
+                "currency": "DKK",
+                "revenue": 8500000,
+                "costOfGoodsSold": 3449000,
+                "grossProfit": 5051000,
+                "operatingExpenses": 4707000,
+                "ebit": 344000,
+                "interestExpense": 120000,
+                "taxExpense": 96000,
+                "netIncome": 128000
+            },
+            "2023": {
+                "currency": "DKK",
+                "revenue": 9200000,
+                "costOfGoodsSold": 3496000,
+                "grossProfit": 5704000,
+                "operatingExpenses": 4500000,
+                "ebit": 1204000,
+                "interestExpense": 140000,
+                "taxExpense": 504000,
+                "netIncome": 560000
+            },
+            "2022": {
+                "currency": "DKK",
+                "revenue": 8800000,
+                "costOfGoodsSold": 3432000,
+                "grossProfit": 5368000,
+                "operatingExpenses": 4250000,
+                "ebit": 1118000,
+                "interestExpense": 160000,
+                "taxExpense": 478000,
+                "netIncome": 480000
+            }
+        },
+        "balance_sheet": {
+            "2024": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 95000,
+                    "accountsReceivable": 850000,
+                    "inventory": 180000,
+                    "totalCurrentAssets": 1200000,
+                    "propertyPlantEquipment": 680000,
+                    "intangibleAssets": 25000,
+                    "totalAssets": 1950000
+                },
+                "liabilities": {
+                    "accountsPayable": 380000,
+                    "shortTermDebt": 220000,
+                    "totalCurrentLiabilities": 680000,
+                    "longTermDebt": 120000,
+                    "totalLiabilities": 850000
+                },
+                "equity": {
+                    "commonStock": 125000,
+                    "retainedEarnings": 975000,
+                    "totalEquity": 1100000
+                }
+            },
+            "2023": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 320000,
+                    "accountsReceivable": 920000,
+                    "inventory": 150000,
+                    "totalCurrentAssets": 1450000,
+                    "propertyPlantEquipment": 750000,
+                    "intangibleAssets": 30000,
+                    "totalAssets": 2280000
+                },
+                "liabilities": {
+                    "accountsPayable": 340000,
+                    "shortTermDebt": 280000,
+                    "totalCurrentLiabilities": 720000,
+                    "longTermDebt": 180000,
+                    "totalLiabilities": 970000
+                },
+                "equity": {
+                    "commonStock": 125000,
+                    "retainedEarnings": 1185000,
+                    "totalEquity": 1310000
+                }
+            },
+            "2022": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 280000,
+                    "accountsReceivable": 780000,
+                    "inventory": 140000,
+                    "totalCurrentAssets": 1250000,
+                    "propertyPlantEquipment": 820000,
+                    "intangibleAssets": 35000,
+                    "totalAssets": 2150000
+                },
+                "liabilities": {
+                    "accountsPayable": 290000,
+                    "shortTermDebt": 320000,
+                    "totalCurrentLiabilities": 710000,
+                    "longTermDebt": 250000,
+                    "totalLiabilities": 1010000
+                },
+                "equity": {
+                    "commonStock": 125000,
+                    "retainedEarnings": 1015000,
+                    "totalEquity": 1140000
+                }
+            }
+        },
+        "contracts": [
+            {
+                "type": "customer",
+                "counterparty": "Various residential projects",
+                "annualValue": 5500000,
+                "term": "Project-based",
+                "autoRenew": false
+            },
+            {
+                "type": "customer",
+                "counterparty": "Commercial renovation contract",
+                "annualValue": 2200000,
+                "term": "1 year",
+                "autoRenew": false,
+                "notes": "Major contract ending Q2 2025"
+            }
+        ]
+    },
+    "stripe": null,
+    "plaid": {
+        "accounts": [
+            {
+                "type": "checking",
+                "bank": "Nykredit",
+                "balance": 95000
+            }
+        ],
+        "monthlyInflow": 710000,
+        "monthlyOutflow": 695000
+    },
+    "trends": {
+        "revenueGrowth": [
+            -0.076,
+            0.045
+        ],
+        "netIncomeGrowth": [
+            -0.77,
+            0.167
+        ],
+        "cashDecline": [
+            -0.70,
+            0.14
+        ],
+        "equityChange": [
+            -0.16,
+            0.15
+        ],
+        "warning": "SEVERE DETERIORATION",
+        "notes": "Revenue down 8%, net income collapsed 77% (560k→128k). Cash reserves dropped 70% (320k→95k). Last year of 3-year trend was strong, but 2024 shows sharp reversal. Project-based revenue makes forecasting difficult."
+    },
+    "expectedScore": {
+        "range": [
+            38,
+            52
+        ],
+        "grade": "D",
+        "notes": "Severe deterioration from prior year. Cash runway ~1 month. Sharp profit decline despite stable revenue suggests margin compression or one-time issues. Key contract ending soon adds uncertainty. High risk profile."
+    }
+}

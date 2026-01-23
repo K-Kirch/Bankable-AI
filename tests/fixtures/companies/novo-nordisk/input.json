@@ -1,0 +1,175 @@
+{
+    "company": {
+        "name": "Novo Nordisk A/S",
+        "cvr": "24256790",
+        "industry": "Pharmaceutical",
+        "founded": "1923",
+        "employees": 47000,
+        "description": "Global healthcare company specializing in diabetes care, obesity, and rare diseases"
+    },
+    "documents": {
+        "profit_and_loss": {
+            "2024": {
+                "currency": "DKK",
+                "revenue": 290000000000,
+                "costOfGoodsSold": 58000000000,
+                "grossProfit": 232000000000,
+                "operatingExpenses": 85000000000,
+                "ebit": 147000000000,
+                "interestExpense": 2000000000,
+                "taxExpense": 29000000000,
+                "netIncome": 116000000000
+            },
+            "2023": {
+                "currency": "DKK",
+                "revenue": 232000000000,
+                "costOfGoodsSold": 48000000000,
+                "grossProfit": 184000000000,
+                "operatingExpenses": 72000000000,
+                "ebit": 112000000000,
+                "interestExpense": 1800000000,
+                "taxExpense": 22000000000,
+                "netIncome": 88200000000
+            },
+            "2022": {
+                "currency": "DKK",
+                "revenue": 177000000000,
+                "costOfGoodsSold": 38000000000,
+                "grossProfit": 139000000000,
+                "operatingExpenses": 58000000000,
+                "ebit": 81000000000,
+                "interestExpense": 1500000000,
+                "taxExpense": 16000000000,
+                "netIncome": 63500000000
+            }
+        },
+        "balance_sheet": {
+            "2024": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 45000000000,
+                    "accountsReceivable": 52000000000,
+                    "inventory": 38000000000,
+                    "totalCurrentAssets": 145000000000,
+                    "propertyPlantEquipment": 95000000000,
+                    "intangibleAssets": 42000000000,
+                    "totalAssets": 320000000000
+                },
+                "liabilities": {
+                    "accountsPayable": 28000000000,
+                    "shortTermDebt": 15000000000,
+                    "totalCurrentLiabilities": 65000000000,
+                    "longTermDebt": 35000000000,
+                    "totalLiabilities": 120000000000
+                },
+                "equity": {
+                    "commonStock": 5000000000,
+                    "retainedEarnings": 195000000000,
+                    "totalEquity": 200000000000
+                }
+            },
+            "2023": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 38000000000,
+                    "accountsReceivable": 42000000000,
+                    "inventory": 32000000000,
+                    "totalCurrentAssets": 120000000000,
+                    "propertyPlantEquipment": 78000000000,
+                    "intangibleAssets": 38000000000,
+                    "totalAssets": 265000000000
+                },
+                "liabilities": {
+                    "accountsPayable": 24000000000,
+                    "shortTermDebt": 12000000000,
+                    "totalCurrentLiabilities": 55000000000,
+                    "longTermDebt": 30000000000,
+                    "totalLiabilities": 100000000000
+                },
+                "equity": {
+                    "commonStock": 5000000000,
+                    "retainedEarnings": 160000000000,
+                    "totalEquity": 165000000000
+                }
+            },
+            "2022": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 32000000000,
+                    "accountsReceivable": 35000000000,
+                    "inventory": 28000000000,
+                    "totalCurrentAssets": 102000000000,
+                    "propertyPlantEquipment": 65000000000,
+                    "intangibleAssets": 35000000000,
+                    "totalAssets": 225000000000
+                },
+                "liabilities": {
+                    "accountsPayable": 20000000000,
+                    "shortTermDebt": 10000000000,
+                    "totalCurrentLiabilities": 48000000000,
+                    "longTermDebt": 28000000000,
+                    "totalLiabilities": 88000000000
+                },
+                "equity": {
+                    "commonStock": 5000000000,
+                    "retainedEarnings": 132000000000,
+                    "totalEquity": 137000000000
+                }
+            }
+        },
+        "contracts": [
+            {
+                "type": "customer",
+                "counterparty": "US Department of Veterans Affairs",
+                "annualValue": 5000000000,
+                "term": "5 years",
+                "autoRenew": true
+            },
+            {
+                "type": "customer",
+                "counterparty": "UK National Health Service",
+                "annualValue": 3500000000,
+                "term": "3 years",
+                "autoRenew": true
+            },
+            {
+                "type": "supplier",
+                "counterparty": "Major API Supplier",
+                "annualValue": 8000000000,
+                "term": "7 years",
+                "autoRenew": false
+            }
+        ]
+    },
+    "stripe": null,
+    "plaid": {
+        "accounts": [
+            {
+                "type": "checking",
+                "bank": "Danske Bank",
+                "balance": 45000000000
+            }
+        ],
+        "monthlyInflow": 24000000000,
+        "monthlyOutflow": 18000000000
+    },
+    "trends": {
+        "revenueGrowth": [
+            0.31,
+            0.25
+        ],
+        "netIncomeGrowth": [
+            0.32,
+            0.39
+        ],
+        "notes": "Consistent 25-30% YoY growth driven by GLP-1 drugs (Ozempic, Wegovy)"
+    },
+    "expectedScore": {
+        "range": [
+            88,
+            95
+        ],
+        "grade": "A",
+        "notes": "Exceptional growth trajectory, strong margins, low debt, diversified customers. AAA-rated company."
+    }
+}

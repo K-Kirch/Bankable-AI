@@ -54,6 +54,66 @@ router.post('/analyze', async (req: Request, res: Response, next: NextFunction) 
 });
 
 /**
+ * POST /api/test/analyze-fixture
+ * Test endpoint: Analyze a company using fixture JSON data directly
+ * This bypasses PDF parsing for testing scoring logic
+ */
+router.post('/test/analyze-fixture', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { fixture } = req.body;
+
+        if (!fixture || !fixture.company) {
+            res.status(400).json({ error: 'fixture with company data is required' });
+            return;
+        }
+
+        const context = getGlobalContext();
+        await context.createSession(fixture.company.name || 'Test Company');
+
+        // Inject P&L as parsed document
+        if (fixture.documents?.profit_and_loss) {
+            await context.addDocument({
+                id: `pl-${Date.now()}`,
+                type: 'profit_and_loss',
+                filename: 'profit_and_loss.json',
+                parsedAt: new Date(),
+                confidence: 1.0,
+                data: fixture.documents.profit_and_loss,
+                rawText: JSON.stringify(fixture.documents.profit_and_loss),
+                trustScore: 0.9,
+            });
+        }
+
+        // Inject Balance Sheet as parsed document
+        if (fixture.documents?.balance_sheet) {
+            await context.addDocument({
+                id: `bs-${Date.now()}`,
+                type: 'balance_sheet',
+                filename: 'balance_sheet.json',
+                parsedAt: new Date(),
+                confidence: 1.0,
+                data: fixture.documents.balance_sheet,
+                rawText: JSON.stringify(fixture.documents.balance_sheet),
+                trustScore: 0.9,
+            });
+        }
+
+        // Run the analysis
+        const result = await orchestrator.analyze(fixture.company.name);
+
+        res.json({
+            success: true,
+            company: fixture.company.name,
+            expectedScore: fixture.expectedScore,
+            actualScore: result.score,
+            roadmap: result.roadmap,
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
  * GET /api/analyze/:sessionId/status
  * Get the status of an ongoing analysis
  */

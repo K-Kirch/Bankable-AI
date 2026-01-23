@@ -1,0 +1,180 @@
+{
+    "company": {
+        "name": "Pleo Technologies A/S",
+        "cvr": "39155435",
+        "industry": "Fintech / Expense Management",
+        "founded": "2015",
+        "employees": 850,
+        "description": "B2B expense management platform with smart company cards"
+    },
+    "documents": {
+        "profit_and_loss": {
+            "2024": {
+                "currency": "DKK",
+                "revenue": 650000000,
+                "costOfGoodsSold": 195000000,
+                "grossProfit": 455000000,
+                "operatingExpenses": 780000000,
+                "ebit": -325000000,
+                "interestExpense": 12000000,
+                "taxExpense": 0,
+                "netIncome": -337000000
+            },
+            "2023": {
+                "currency": "DKK",
+                "revenue": 420000000,
+                "costOfGoodsSold": 130000000,
+                "grossProfit": 290000000,
+                "operatingExpenses": 680000000,
+                "ebit": -390000000,
+                "interestExpense": 8000000,
+                "taxExpense": 0,
+                "netIncome": -398000000
+            },
+            "2022": {
+                "currency": "DKK",
+                "revenue": 250000000,
+                "costOfGoodsSold": 80000000,
+                "grossProfit": 170000000,
+                "operatingExpenses": 520000000,
+                "ebit": -350000000,
+                "interestExpense": 5000000,
+                "taxExpense": 0,
+                "netIncome": -355000000
+            }
+        },
+        "balance_sheet": {
+            "2024": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 420000000,
+                    "accountsReceivable": 85000000,
+                    "inventory": 0,
+                    "totalCurrentAssets": 520000000,
+                    "propertyPlantEquipment": 25000000,
+                    "intangibleAssets": 180000000,
+                    "totalAssets": 750000000
+                },
+                "liabilities": {
+                    "accountsPayable": 45000000,
+                    "shortTermDebt": 0,
+                    "totalCurrentLiabilities": 120000000,
+                    "longTermDebt": 150000000,
+                    "totalLiabilities": 320000000
+                },
+                "equity": {
+                    "commonStock": 800000000,
+                    "retainedEarnings": -370000000,
+                    "totalEquity": 430000000
+                }
+            },
+            "2023": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 680000000,
+                    "accountsReceivable": 55000000,
+                    "inventory": 0,
+                    "totalCurrentAssets": 750000000,
+                    "propertyPlantEquipment": 20000000,
+                    "intangibleAssets": 150000000,
+                    "totalAssets": 950000000
+                },
+                "liabilities": {
+                    "accountsPayable": 35000000,
+                    "shortTermDebt": 0,
+                    "totalCurrentLiabilities": 100000000,
+                    "longTermDebt": 100000000,
+                    "totalLiabilities": 250000000
+                },
+                "equity": {
+                    "commonStock": 750000000,
+                    "retainedEarnings": -50000000,
+                    "totalEquity": 700000000
+                }
+            },
+            "2022": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 950000000,
+                    "accountsReceivable": 35000000,
+                    "inventory": 0,
+                    "totalCurrentAssets": 1000000000,
+                    "propertyPlantEquipment": 15000000,
+                    "intangibleAssets": 120000000,
+                    "totalAssets": 1150000000
+                },
+                "liabilities": {
+                    "accountsPayable": 28000000,
+                    "shortTermDebt": 0,
+                    "totalCurrentLiabilities": 80000000,
+                    "longTermDebt": 50000000,
+                    "totalLiabilities": 180000000
+                },
+                "equity": {
+                    "commonStock": 700000000,
+                    "retainedEarnings": 270000000,
+                    "totalEquity": 970000000
+                }
+            }
+        },
+        "contracts": [
+            {
+                "type": "customer",
+                "counterparty": "Enterprise Client Portfolio (500+ companies)",
+                "annualValue": 280000000,
+                "term": "Annual subscriptions",
+                "autoRenew": true
+            }
+        ]
+    },
+    "stripe": {
+        "mrr": 54000000,
+        "arrGrowthRate": 0.55,
+        "customerCount": 25000,
+        "churnRate": 0.025,
+        "topCustomers": [
+            {
+                "name": "Large Nordic Enterprise",
+                "percentOfRevenue": 0.03
+            },
+            {
+                "name": "UK Tech Company",
+                "percentOfRevenue": 0.025
+            }
+        ],
+        "paymentSuccessRate": 0.985,
+        "averagePaymentDelay": 2,
+        "disputeRate": 0.002
+    },
+    "plaid": {
+        "accounts": [
+            {
+                "type": "checking",
+                "bank": "Nordea",
+                "balance": 420000000
+            }
+        ],
+        "monthlyInflow": 58000000,
+        "monthlyOutflow": 85000000
+    },
+    "trends": {
+        "revenueGrowth": [
+            0.55,
+            0.68
+        ],
+        "netIncomeGrowth": [
+            0.15,
+            -0.12
+        ],
+        "burnRateImproving": true,
+        "notes": "Strong revenue growth (55% YoY). Losses narrowing as % of revenue. Cash declining but still has runway."
+    },
+    "expectedScore": {
+        "range": [
+            58,
+            70
+        ],
+        "grade": "C",
+        "notes": "High-growth SaaS with improving unit economics. Strong revenue trajectory offsets losses. ~5 month runway is concerning but typical for growth-stage."
+    }
+}

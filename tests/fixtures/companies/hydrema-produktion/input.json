@@ -1,0 +1,187 @@
+{
+    "company": {
+        "name": "A/S HYDREMA PRODUKTION",
+        "cvr": "13897603",
+        "industry": "Manufacturing / Heavy Equipment",
+        "founded": "1959",
+        "employees": 450,
+        "description": "Manufacturer of construction and agricultural machinery"
+    },
+    "documents": {
+        "profit_and_loss": {
+            "2024": {
+                "currency": "DKK",
+                "revenue": 1200000000,
+                "costOfGoodsSold": 840000000,
+                "grossProfit": 360000000,
+                "operatingExpenses": 275000000,
+                "ebit": 85000000,
+                "interestExpense": 18000000,
+                "taxExpense": 15000000,
+                "netIncome": 52000000
+            },
+            "2023": {
+                "currency": "DKK",
+                "revenue": 1150000000,
+                "costOfGoodsSold": 805000000,
+                "grossProfit": 345000000,
+                "operatingExpenses": 265000000,
+                "ebit": 80000000,
+                "interestExpense": 20000000,
+                "taxExpense": 13000000,
+                "netIncome": 47000000
+            },
+            "2022": {
+                "currency": "DKK",
+                "revenue": 1080000000,
+                "costOfGoodsSold": 756000000,
+                "grossProfit": 324000000,
+                "operatingExpenses": 255000000,
+                "ebit": 69000000,
+                "interestExpense": 22000000,
+                "taxExpense": 10000000,
+                "netIncome": 37000000
+            }
+        },
+        "balance_sheet": {
+            "2024": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 65000000,
+                    "accountsReceivable": 180000000,
+                    "inventory": 220000000,
+                    "totalCurrentAssets": 480000000,
+                    "propertyPlantEquipment": 350000000,
+                    "intangibleAssets": 45000000,
+                    "totalAssets": 920000000
+                },
+                "liabilities": {
+                    "accountsPayable": 95000000,
+                    "shortTermDebt": 85000000,
+                    "totalCurrentLiabilities": 220000000,
+                    "longTermDebt": 280000000,
+                    "totalLiabilities": 550000000
+                },
+                "equity": {
+                    "commonStock": 50000000,
+                    "retainedEarnings": 320000000,
+                    "totalEquity": 370000000
+                }
+            },
+            "2023": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 55000000,
+                    "accountsReceivable": 170000000,
+                    "inventory": 200000000,
+                    "totalCurrentAssets": 440000000,
+                    "propertyPlantEquipment": 380000000,
+                    "intangibleAssets": 48000000,
+                    "totalAssets": 905000000
+                },
+                "liabilities": {
+                    "accountsPayable": 88000000,
+                    "shortTermDebt": 95000000,
+                    "totalCurrentLiabilities": 230000000,
+                    "longTermDebt": 320000000,
+                    "totalLiabilities": 600000000
+                },
+                "equity": {
+                    "commonStock": 50000000,
+                    "retainedEarnings": 255000000,
+                    "totalEquity": 305000000
+                }
+            },
+            "2022": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 48000000,
+                    "accountsReceivable": 158000000,
+                    "inventory": 185000000,
+                    "totalCurrentAssets": 405000000,
+                    "propertyPlantEquipment": 395000000,
+                    "intangibleAssets": 50000000,
+                    "totalAssets": 885000000
+                },
+                "liabilities": {
+                    "accountsPayable": 82000000,
+                    "shortTermDebt": 105000000,
+                    "totalCurrentLiabilities": 240000000,
+                    "longTermDebt": 360000000,
+                    "totalLiabilities": 650000000
+                },
+                "equity": {
+                    "commonStock": 50000000,
+                    "retainedEarnings": 185000000,
+                    "totalEquity": 235000000
+                }
+            }
+        },
+        "contracts": [
+            {
+                "type": "customer",
+                "counterparty": "Major Construction Distributor",
+                "annualValue": 350000000,
+                "term": "3 years",
+                "autoRenew": true,
+                "percentOfRevenue": 0.29
+            },
+            {
+                "type": "customer",
+                "counterparty": "Agricultural Equipment Network",
+                "annualValue": 180000000,
+                "term": "2 years",
+                "autoRenew": true,
+                "percentOfRevenue": 0.15
+            },
+            {
+                "type": "supplier",
+                "counterparty": "Steel Supplier",
+                "annualValue": 280000000,
+                "term": "Annual",
+                "autoRenew": true
+            }
+        ]
+    },
+    "stripe": null,
+    "plaid": {
+        "accounts": [
+            {
+                "type": "checking",
+                "bank": "Jyske Bank",
+                "balance": 65000000
+            },
+            {
+                "type": "credit",
+                "bank": "Jyske Bank",
+                "balance": -45000000
+            }
+        ],
+        "monthlyInflow": 100000000,
+        "monthlyOutflow": 95000000
+    },
+    "trends": {
+        "revenueGrowth": [
+            0.043,
+            0.065
+        ],
+        "netIncomeGrowth": [
+            0.106,
+            0.27
+        ],
+        "debtDecreasing": true,
+        "equityGrowth": [
+            0.21,
+            0.30
+        ],
+        "notes": "Steady, consistent growth. Revenue up 11% over 2 years, profit up 41%. Debt paid down, equity strengthened. Classic stable manufacturing pattern."
+    },
+    "expectedScore": {
+        "range": [
+            74,
+            84
+        ],
+        "grade": "B+",
+        "notes": "Stable, profitable manufacturing with improving trajectory. Moderate leverage decreasing. Concentration risk (29% with top customer) is main flag. Long operating history (65 years) is positive."
+    }
+}

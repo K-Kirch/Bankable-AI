@@ -1,0 +1,170 @@
+{
+    "company": {
+        "name": "Spisehuset 5C ApS",
+        "cvr": "37818291",
+        "industry": "Restaurant / Hospitality",
+        "founded": "2016",
+        "employees": 8,
+        "description": "Small neighborhood restaurant in Copenhagen"
+    },
+    "documents": {
+        "profit_and_loss": {
+            "2024": {
+                "currency": "DKK",
+                "revenue": 4200000,
+                "costOfGoodsSold": 1470000,
+                "grossProfit": 2730000,
+                "operatingExpenses": 2450000,
+                "ebit": 280000,
+                "interestExpense": 45000,
+                "taxExpense": 52000,
+                "netIncome": 183000
+            },
+            "2023": {
+                "currency": "DKK",
+                "revenue": 4050000,
+                "costOfGoodsSold": 1420000,
+                "grossProfit": 2630000,
+                "operatingExpenses": 2380000,
+                "ebit": 250000,
+                "interestExpense": 48000,
+                "taxExpense": 45000,
+                "netIncome": 157000
+            },
+            "2022": {
+                "currency": "DKK",
+                "revenue": 3600000,
+                "costOfGoodsSold": 1260000,
+                "grossProfit": 2340000,
+                "operatingExpenses": 2200000,
+                "ebit": 140000,
+                "interestExpense": 52000,
+                "taxExpense": 20000,
+                "netIncome": 68000
+            }
+        },
+        "balance_sheet": {
+            "2024": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 185000,
+                    "accountsReceivable": 25000,
+                    "inventory": 95000,
+                    "totalCurrentAssets": 320000,
+                    "propertyPlantEquipment": 450000,
+                    "intangibleAssets": 50000,
+                    "totalAssets": 850000
+                },
+                "liabilities": {
+                    "accountsPayable": 120000,
+                    "shortTermDebt": 80000,
+                    "totalCurrentLiabilities": 250000,
+                    "longTermDebt": 280000,
+                    "totalLiabilities": 580000
+                },
+                "equity": {
+                    "commonStock": 125000,
+                    "retainedEarnings": 145000,
+                    "totalEquity": 270000
+                }
+            },
+            "2023": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 145000,
+                    "accountsReceivable": 20000,
+                    "inventory": 85000,
+                    "totalCurrentAssets": 265000,
+                    "propertyPlantEquipment": 520000,
+                    "intangibleAssets": 55000,
+                    "totalAssets": 870000
+                },
+                "liabilities": {
+                    "accountsPayable": 110000,
+                    "shortTermDebt": 95000,
+                    "totalCurrentLiabilities": 260000,
+                    "longTermDebt": 350000,
+                    "totalLiabilities": 670000
+                },
+                "equity": {
+                    "commonStock": 125000,
+                    "retainedEarnings": 75000,
+                    "totalEquity": 200000
+                }
+            },
+            "2022": {
+                "currency": "DKK",
+                "assets": {
+                    "cash": 98000,
+                    "accountsReceivable": 15000,
+                    "inventory": 75000,
+                    "totalCurrentAssets": 200000,
+                    "propertyPlantEquipment": 580000,
+                    "intangibleAssets": 60000,
+                    "totalAssets": 870000
+                },
+                "liabilities": {
+                    "accountsPayable": 95000,
+                    "shortTermDebt": 110000,
+                    "totalCurrentLiabilities": 265000,
+                    "longTermDebt": 420000,
+                    "totalLiabilities": 745000
+                },
+                "equity": {
+                    "commonStock": 125000,
+                    "retainedEarnings": 0,
+                    "totalEquity": 125000
+                }
+            }
+        },
+        "contracts": [
+            {
+                "type": "lease",
+                "counterparty": "Property Owner",
+                "annualValue": 480000,
+                "term": "5 years",
+                "autoRenew": false,
+                "expiresIn": "2.5 years"
+            },
+            {
+                "type": "supplier",
+                "counterparty": "Food Distributor",
+                "annualValue": 850000,
+                "term": "1 year",
+                "autoRenew": true
+            }
+        ]
+    },
+    "stripe": null,
+    "plaid": {
+        "accounts": [
+            {
+                "type": "checking",
+                "bank": "Arbejdernes Landsbank",
+                "balance": 185000
+            }
+        ],
+        "monthlyInflow": 350000,
+        "monthlyOutflow": 335000
+    },
+    "trends": {
+        "revenueGrowth": [
+            0.037,
+            0.125
+        ],
+        "netIncomeGrowth": [
+            0.166,
+            1.31
+        ],
+        "debtDecreasing": true,
+        "notes": "Steady improvement: revenue up 17% over 2 years, debt paid down significantly, equity growing. Post-COVID recovery visible."
+    },
+    "expectedScore": {
+        "range": [
+            62,
+            74
+        ],
+        "grade": "C+",
+        "notes": "Small restaurant with positive trajectory. Thin margins typical for hospitality but improving. Debt declining. Lease expiry in 2.5 years is only concern."
+    }
+}
