@@ -70,7 +70,7 @@ export abstract class BaseAgent {
 
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({
-            model: 'gemini-2.0-flash-exp',
+            model: 'gemini-3-pro-preview',
             generationConfig: {
                 temperature: 0.3,
                 topP: 0.95,
@@ -271,7 +271,7 @@ IMPORTANT: Keep impact scores moderate (-40 to +40 range). Only use extreme scor
             inputData,
             rawResponse: rawText,
             parsedResponse: parsed,
-            modelUsed: 'gemini-2.0-flash-exp',
+            modelUsed: 'gemini-3-pro-preview',
             tokenCount: {
                 prompt: Math.ceil(prompt.length / 4), // Rough estimate
                 completion: Math.ceil(rawText.length / 4),

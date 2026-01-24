@@ -129,6 +129,18 @@ export class AgentOrchestrator {
         score: BankabilityScore;
         roadmap: RemediationRoadmap;
     }> {
+        // Step 0: Check for obvious cases FIRST (before LLM analysis)
+        const { checkObviousCases } = await import('../synthesis/obvious-cases.js');
+        const obviousResult = checkObviousCases(context);
+
+        if (obviousResult) {
+            console.log(`[Orchestrator] Obvious case detected: ${obviousResult.caseType} - skipping LLM analysis`);
+            return {
+                score: obviousResult.score,
+                roadmap: obviousResult.roadmap,
+            };
+        }
+
         // Step 1: Run all agents in parallel
         this.state!.status = 'analyzing';
         const insights = await this.runAgentsParallel(context);
