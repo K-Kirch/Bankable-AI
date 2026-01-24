@@ -1173,3 +1173,140 @@ a:hover {
   font-size: 0.75rem;
   color: var(--accent-primary);
 }
+
+/* ============================================
+   DOCUMENTATION PAGE
+   ============================================ */
+
+.doc-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.doc-type-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  transition: all 0.2s;
+}
+
+.doc-type-card:hover {
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+}
+
+.doc-type-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.doc-type-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.doc-type-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.doc-type-badge {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.doc-type-badge.required {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+}
+
+.doc-type-badge.recommended {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--warning);
+}
+
+.doc-type-badge.optional {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--success);
+}
+
+.doc-type-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.doc-type-details {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.doc-type-details h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+.doc-type-details ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.doc-type-details li {
+  position: relative;
+  padding-left: var(--spacing-md);
+  margin-bottom: 4px;
+}
+
+.doc-type-details li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent-primary);
+}
+
+/* Tips Grid */
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.tip-card {
+  display: flex;
+  gap: var(--spacing-md);
+  background: var(--bg-glass);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.tip-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.tip-card h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.tip-card p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
