@@ -47,6 +47,12 @@ router.post('/analyze', async (req: Request, res: Response, next: NextFunction) 
             success: true,
             score: result.score,
             roadmap: result.roadmap,
+            // Enhanced breakdown for actionable dashboard
+            breakdown: {
+                riskFactors: result.score.riskFactors,
+                explanation: result.score.explanation,
+                penalties: result.score.penalties,
+            }
         });
     } catch (error) {
         next(error);

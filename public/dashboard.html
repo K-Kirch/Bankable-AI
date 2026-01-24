@@ -23,7 +23,7 @@
 
         <main class="container" style="padding: 2rem 1rem;">
             <!-- Score Section -->
-            <section style="text-align: center; margin-bottom: 3rem;">
+            <section style="text-align: center; margin-bottom: 2rem;">
                 <h1 style="margin-bottom: 0.5rem;">Your Bankability Score</h1>
                 <p id="companyName" style="color: var(--text-secondary);">Company Name</p>
 
@@ -51,6 +51,121 @@
                 </p>
             </section>
 
+            <!-- Critical Issues Alert (if any) -->
+            <section id="criticalAlertSection" class="critical-alert-section" style="display: none;">
+                <div class="critical-alert">
+                    <div class="critical-alert-header">
+                        <span class="critical-alert-icon">⚠️</span>
+                        <span class="critical-alert-title">Critical Issues Requiring Attention</span>
+                    </div>
+                    <ul id="criticalIssuesList" class="critical-issues-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Executive Summary -->
+            <section style="margin-bottom: 3rem;">
+                <h2 style="margin-bottom: 1rem;">Executive Summary</h2>
+                <div class="executive-summary" id="executiveSummary">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Score Projection -->
+            <section class="score-projection-section" style="margin-bottom: 3rem;">
+                <h2 style="margin-bottom: 1rem;">Score Potential</h2>
+                <div class="score-projection" id="scoreProjection">
+                    <div class="projection-current">
+                        <div class="projection-label">Current Score</div>
+                        <div class="projection-value" id="projectionCurrent">--</div>
+                    </div>
+                    <div class="projection-arrow">
+                        <svg width="40" height="24" viewBox="0 0 40 24" fill="none">
+                            <path d="M0 12H36M36 12L26 4M36 12L26 20" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div class="projection-potential">
+                        <div class="projection-label">After Remediation</div>
+                        <div class="projection-value" id="projectionPotential">--</div>
+                    </div>
+                    <div class="projection-gain">
+                        <span id="projectionGain">+0</span> points possible
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timeline Roadmap -->
+            <section style="margin-bottom: 3rem;">
+                <h2 style="margin-bottom: 0.5rem;">Improvement Timeline</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Estimated impact at each phase
+                </p>
+                <div class="timeline-roadmap" id="timelineRoadmap">
+                    <div class="timeline-phase quick-wins">
+                        <div class="timeline-phase-header">
+                            <span class="timeline-phase-icon">⚡</span>
+                            <span class="timeline-phase-title">Quick Wins</span>
+                        </div>
+                        <div class="timeline-phase-stats">
+                            <div class="timeline-stat">
+                                <span class="timeline-stat-value" id="quickWinsTasks">0</span>
+                                <span class="timeline-stat-label">tasks</span>
+                            </div>
+                            <div class="timeline-stat">
+                                <span class="timeline-stat-value" id="quickWinsDays">0</span>
+                                <span class="timeline-stat-label">days</span>
+                            </div>
+                            <div class="timeline-stat gain">
+                                <span class="timeline-stat-value" id="quickWinsGain">+0</span>
+                                <span class="timeline-stat-label">points</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-phase short-term">
+                        <div class="timeline-phase-header">
+                            <span class="timeline-phase-icon">📅</span>
+                            <span class="timeline-phase-title">Short-term</span>
+                        </div>
+                        <div class="timeline-phase-stats">
+                            <div class="timeline-stat">
+                                <span class="timeline-stat-value" id="shortTermTasks">0</span>
+                                <span class="timeline-stat-label">tasks</span>
+                            </div>
+                            <div class="timeline-stat">
+                                <span class="timeline-stat-value" id="shortTermDays">0</span>
+                                <span class="timeline-stat-label">days</span>
+                            </div>
+                            <div class="timeline-stat gain">
+                                <span class="timeline-stat-value" id="shortTermGain">+0</span>
+                                <span class="timeline-stat-label">points</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-phase long-term">
+                        <div class="timeline-phase-header">
+                            <span class="timeline-phase-icon">🎯</span>
+                            <span class="timeline-phase-title">Long-term</span>
+                        </div>
+                        <div class="timeline-phase-stats">
+                            <div class="timeline-stat">
+                                <span class="timeline-stat-value" id="longTermTasks">0</span>
+                                <span class="timeline-stat-label">tasks</span>
+                            </div>
+                            <div class="timeline-stat">
+                                <span class="timeline-stat-value" id="longTermDays">0</span>
+                                <span class="timeline-stat-label">days</span>
+                            </div>
+                            <div class="timeline-stat gain">
+                                <span class="timeline-stat-value" id="longTermGain">+0</span>
+                                <span class="timeline-stat-label">points</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Risk Factors -->
             <section>
                 <h2 style="margin-bottom: 1rem;">Risk Factor Breakdown</h2>
@@ -68,6 +183,13 @@
                 <div class="task-list" id="taskList">
                     <!-- Populated by JS -->
                 </div>
+            </section>
+
+            <!-- Export Actions -->
+            <section style="margin-top: 3rem; text-align: center;">
+                <button class="btn btn-secondary" onclick="exportReport()">
+                    📥 Export Report
+                </button>
             </section>
         </main>
     </div>

@@ -9,22 +9,22 @@
   --bg-secondary: #1e293b;
   --bg-card: rgba(30, 41, 59, 0.8);
   --bg-glass: rgba(255, 255, 255, 0.05);
-  
+
   --accent-primary: #3b82f6;
   --accent-secondary: #8b5cf6;
   --accent-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  
+
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
-  
+
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  
+
   /* Typography */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  
+
   /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -32,14 +32,14 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
-  
+
   /* Border Radius */
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-full: 9999px;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
@@ -48,7 +48,9 @@
 }
 
 /* Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -71,16 +73,32 @@ body {
    TYPOGRAPHY
    ============================================ */
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 600;
   line-height: 1.2;
   margin-bottom: var(--spacing-md);
 }
 
-h1 { font-size: 3rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
 
 p {
   color: var(--text-secondary);
@@ -353,11 +371,30 @@ a:hover {
   margin-top: var(--spacing-md);
 }
 
-.grade-A { background: var(--success); color: white; }
-.grade-B { background: #84cc16; color: white; }
-.grade-C { background: var(--warning); color: white; }
-.grade-D { background: #f97316; color: white; }
-.grade-F { background: var(--danger); color: white; }
+.grade-A {
+  background: var(--success);
+  color: white;
+}
+
+.grade-B {
+  background: #84cc16;
+  color: white;
+}
+
+.grade-C {
+  background: var(--warning);
+  color: white;
+}
+
+.grade-D {
+  background: #f97316;
+  color: white;
+}
+
+.grade-F {
+  background: var(--danger);
+  color: white;
+}
 
 /* ============================================
    COMPONENTS: RISK CARDS
@@ -407,9 +444,17 @@ a:hover {
   transition: width 1s ease-out;
 }
 
-.risk-bar-fill.high { background: var(--success); }
-.risk-bar-fill.medium { background: var(--warning); }
-.risk-bar-fill.low { background: var(--danger); }
+.risk-bar-fill.high {
+  background: var(--success);
+}
+
+.risk-bar-fill.medium {
+  background: var(--warning);
+}
+
+.risk-bar-fill.low {
+  background: var(--danger);
+}
 
 /* ============================================
    COMPONENTS: TASK LIST
@@ -467,18 +512,37 @@ a:hover {
    ============================================ */
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-pulse {
@@ -657,18 +721,455 @@ a:hover {
    ============================================ */
 
 @media (max-width: 768px) {
-  h1 { font-size: 2rem; }
-  .hero h1 { font-size: 2.5rem; }
-  
+  h1 {
+    font-size: 2rem;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+
   .steps {
     grid-template-columns: 1fr;
   }
-  
+
   .risk-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .btn-lg {
     padding: var(--spacing-md) var(--spacing-xl);
   }
+
+  .executive-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .score-projection {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .projection-arrow {
+    transform: rotate(90deg);
+  }
+
+  .timeline-roadmap {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   CRITICAL ISSUES ALERT
+   ============================================ */
+
+.critical-alert-section {
+  margin-bottom: 2rem;
+}
+
+.critical-alert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.critical-alert-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.critical-alert-icon {
+  font-size: 1.25rem;
+}
+
+.critical-alert-title {
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.critical-issues-list {
+  margin: 0;
+  padding-left: var(--spacing-lg);
+  color: var(--text-secondary);
+}
+
+.critical-issues-list li {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* ============================================
+   EXECUTIVE SUMMARY
+   ============================================ */
+
+.executive-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xl);
+}
+
+.summary-column {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.summary-column.strengths {
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.summary-column.concerns {
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.summary-column-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+}
+
+.summary-icon {
+  font-size: 1.25rem;
+}
+
+.insight-card {
+  background: var(--bg-glass);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.insight-card.strength {
+  border-left: 3px solid var(--success);
+}
+
+.insight-card.concern {
+  border-left: 3px solid var(--warning);
+}
+
+.insight-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.no-items {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ============================================
+   SCORE PROJECTION
+   ============================================ */
+
+.score-projection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2xl);
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  position: relative;
+}
+
+.projection-current,
+.projection-potential {
+  text-align: center;
+}
+
+.projection-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.projection-value {
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.projection-current .projection-value {
+  color: var(--text-secondary);
+}
+
+.projection-potential .projection-value {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.projection-arrow {
+  color: var(--text-muted);
+}
+
+.projection-gain {
+  position: absolute;
+  bottom: var(--spacing-md);
+  right: var(--spacing-lg);
+  font-size: 0.875rem;
+  color: var(--success);
+  font-weight: 600;
+}
+
+.projection-gain.high-gain {
+  color: var(--success);
+}
+
+.projection-gain.medium-gain {
+  color: #84cc16;
+}
+
+/* ============================================
+   TIMELINE ROADMAP
+   ============================================ */
+
+.timeline-roadmap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.timeline-phase {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  text-align: center;
+}
+
+.timeline-phase.quick-wins {
+  border-top: 3px solid var(--success);
+}
+
+.timeline-phase.short-term {
+  border-top: 3px solid var(--warning);
+}
+
+.timeline-phase.long-term {
+  border-top: 3px solid var(--accent-primary);
+}
+
+.timeline-phase-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.timeline-phase-icon {
+  font-size: 1.25rem;
+}
+
+.timeline-phase-title {
+  font-weight: 600;
+}
+
+.timeline-phase-stats {
+  display: flex;
+  justify-content: space-around;
+}
+
+.timeline-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timeline-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.timeline-stat.gain .timeline-stat-value {
+  color: var(--success);
+}
+
+.timeline-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   EXPANDABLE RISK CARDS
+   ============================================ */
+
+.risk-card.expandable {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.risk-card.expandable:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.risk-card.expanded {
+  border-color: var(--accent-primary);
+}
+
+.risk-components {
+  margin-top: var(--spacing-md);
+}
+
+.risk-components-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: var(--spacing-md);
+}
+
+.risk-component {
+  margin-bottom: var(--spacing-md);
+}
+
+.risk-component-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.risk-component-name {
+  color: var(--text-secondary);
+}
+
+.risk-component-value {
+  font-weight: 600;
+}
+
+.risk-component-bar {
+  height: 4px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.risk-component-bar-fill {
+  height: 100%;
+  background: var(--accent-gradient);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease-out;
+}
+
+.risk-component-interpretation {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: var(--spacing-xs);
+  margin-bottom: 0;
+}
+
+.risk-card-expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+}
+
+.expand-icon {
+  font-size: 0.625rem;
+  transition: transform 0.2s;
+}
+
+/* ============================================
+   ENHANCED TASK LIST
+   ============================================ */
+
+.task-item.expandable {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.task-item.expandable:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.task-item.expanded {
+  border-color: var(--accent-primary);
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+.task-category {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-secondary);
+}
+
+.task-category.quick_win {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--success);
+}
+
+.task-category.structural {
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--accent-secondary);
+}
+
+.task-category.strategic {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--accent-primary);
+}
+
+.task-actions {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-items-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.action-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.action-items-list li {
+  position: relative;
+  padding-left: var(--spacing-lg);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.action-items-list li::before {
+  content: '○';
+  position: absolute;
+  left: 0;
+  color: var(--accent-primary);
+}
+
+.task-expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
+  font-size: 0.75rem;
+  color: var(--accent-primary);
 }
