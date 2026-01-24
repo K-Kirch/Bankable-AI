@@ -16,6 +16,9 @@ import type {
 } from '../types/index.js';
 import type { MessageBus, Message } from '../core/message-bus.js';
 import { AuditTrail, getAuditTrail, hasAuditTrail, createAuditTrail } from '../core/audit-trail.js';
+import { detectIndustry, getIndustryBaselinePrompt } from '../prompts/industry-baselines.js';
+import { getCalibrationPrompt } from '../prompts/calibration-cases.js';
+import { getAllContext } from '../prompts/context-providers.js';
 
 // ============================================
 // LLM RESPONSE TYPES
@@ -95,6 +98,13 @@ export abstract class BaseAgent {
             // Prepare context data for LLM
             const analysisData = this.prepareAnalysisData(context);
 
+            // Check for sufficient data before running analysis
+            const hasData = this.validateDataSufficiency(context);
+            if (!hasData) {
+                console.log(`[${this.id}] Skipping analysis - insufficient data`);
+                return [this.createInsufficientDataInsight()];
+            }
+
             // Build the comprehensive prompt
             const prompt = this.buildLLMPrompt(analysisData);
 
@@ -148,18 +158,31 @@ export abstract class BaseAgent {
     }
 
     /**
-     * Build the full LLM prompt
+     * Build the full LLM prompt with scaffolding
      */
     protected buildLLMPrompt(analysisData: Record<string, unknown>): string {
+        // Detect industry for baseline and calibration
+        const industry = detectIndustry(analysisData as { industry?: string; description?: string });
+
+        // Get scaffolding components
+        const industryBaseline = getIndustryBaselinePrompt(industry);
+        const calibrationExamples = getCalibrationPrompt(industry, 2);
+        const contextProviders = getAllContext({
+            agentId: this.id,
+            globalContext: this.context ?? undefined,
+            industry,
+            analysisData,
+        });
+
         return `You are "${this.name}", a specialized AI agent for the Bankable.ai credit analysis platform.
 
 YOUR ROLE: ${this.description}
 
-IMPORTANT INSTRUCTIONS:
-1. You are the SOLE analyst - perform comprehensive analysis based on all available data
-2. Do NOT defer to other systems or suggest "further analysis needed"
-3. Make concrete assessments with specific impact scores
-4. Explain your reasoning clearly for auditability
+${industryBaseline}
+
+${calibrationExamples}
+
+${contextProviders}
 
 CATEGORIES YOU ANALYZE: ${this.categories.join(', ')}
 
@@ -176,7 +199,7 @@ RESPONSE FORMAT - Respond with valid JSON only:
       "category": "${this.categories[0]}", 
       "title": "Brief descriptive title",
       "description": "Detailed explanation of the finding",
-      "impact": <number from -100 to +100>,
+      "impact": <number from -40 to +40>,
       "confidence": <number from 0 to 1>,
       "reasoning": "Step-by-step explanation of how you reached this conclusion",
       "evidence": [
@@ -190,11 +213,8 @@ RESPONSE FORMAT - Respond with valid JSON only:
   ]
 }
 
-Analyze the data thoroughly and provide 2-5 key insights. Each insight should be actionable and specific.
-For impact scoring:
-- Positive impacts (+1 to +100): Factors that IMPROVE bankability
-- Negative impacts (-1 to -100): Factors that REDUCE bankability
-- Zero impact: Neutral observations (avoid these - be decisive)`;
+Provide 2-4 key insights. Each insight should be actionable and specific.
+IMPORTANT: Keep impact scores moderate (-40 to +40 range). Only use extreme scores for truly exceptional findings.`;
     }
 
     /**
@@ -295,6 +315,43 @@ For impact scoring:
             reasoningChain: insight.reasoning,
             auditEntryId,
         }));
+    }
+
+    /**
+     * Check if there is sufficient data to run analysis
+     */
+    protected validateDataSufficiency(context: GlobalContext): boolean {
+        const hasDocuments = context.documents && context.documents.length > 0;
+        const stripeData = context.apiSnapshots?.stripe;
+        const hasStripeData = stripeData && (
+            (stripeData.mrr ?? 0) > 0 ||
+            (stripeData.customerCount ?? 0) > 0
+        );
+        const plaidData = context.apiSnapshots?.plaid;
+        const hasPlaidData = plaidData && (
+            (plaidData.accounts && plaidData.accounts.length > 0) ||
+            !!plaidData.transactions
+        );
+
+        return Boolean(hasDocuments || hasStripeData || hasPlaidData);
+    }
+
+    /**
+     * Create an insight for insufficient data scenarios
+     */
+    protected createInsufficientDataInsight(): AgentInsight {
+        return {
+            id: uuid(),
+            agentId: this.id,
+            timestamp: new Date(),
+            category: 'financial_health',
+            title: 'Insufficient Data for Analysis',
+            description: 'Unable to perform analysis due to lack of input data. Please upload financial documents (P&L, balance sheet, contracts) or connect financial APIs (Stripe, Plaid) to enable comprehensive analysis.',
+            confidence: 1.0,
+            impact: 0, // Neutral impact - not penalizing or rewarding
+            evidence: [],
+            reasoningChain: 'No documents, Stripe data, or Plaid data were provided for analysis. Returning neutral impact to avoid arbitrary scoring.',
+        };
     }
 
     /**

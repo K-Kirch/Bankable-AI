@@ -1,0 +1,65 @@
+﻿Starting single eval...
+Company: A/S HYDREMA PRODUKTION
+Expected: 74-84
+npx : Redis connection failed, 
+using in-memory storage
+At line:1 char:1
++ npx tsx 
+tests/scripts/simple-eval.ts 
+2>&1 | Out-File -FilePath 
+eval-o ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo          : 
+NotS    pecified: (Redis 
+connectio...-    memory 
+storage:String) [], Rem    
+oteException
+    + FullyQualifiedErrorId : 
+Nati    veCommandError
+ 
+Context initialized, running agents...
+[Orchestrator] Reusing existing context with 3 documents
+[Audit] lawyer | full_analysis | 7802ms | 4300 tokens
+[Audit] counter | full_analysis | 9444ms | 4501 tokens
+[forecaster] Received insight from counter: Strong Debt Service Coverage Ratio
+[Audit] forecaster | full_analysis | 9425ms | 4518 tokens
+
+Actual Score: 65 (B)
+In Range: NO ÔÜá´©Å
+
+Insights:
+  [lawyer] Strong Customer Contract Security with Auto-Renewal Clauses (+20)
+  [lawyer] Annual Supplier Contract with Auto-Renewal Requires Monitoring (+5)
+  [lawyer] Missing Documentation on Legal Structure and Governance (-10)
+  [lawyer] Moderate Customer Retention Protection through Contract Terms (+5)
+  [counter] Strong Debt Service Coverage Ratio (+25)
+  [counter] Moderate Revenue Concentration Risk (-5)
+  [counter] Positive Cash Flow from Plaid Data (+15)
+  [counter] Consistent Revenue Growth (+10)
+  [forecaster] Modest Revenue Growth Trajectory (+5)
+  [forecaster] Significant Customer Concentration Risk (-15)
+  [forecaster] Moderate Resilience to Pessimistic Scenario (+5)
+  [forecaster] Low Default Probability Based on Current Runway (+15)
+
+Audit Trail: 3 entries
+Summary: {
+  "totalCalls": 3,
+  "totalTokens": 13319,
+  "totalLatencyMs": 26671,
+  "averageLatencyMs": 8890.333333333334,
+  "byAgent": {
+    "lawyer": {
+      "calls": 1,
+      "tokens": 4300
+    },
+    "counter": {
+      "calls": 1,
+      "tokens": 4501
+    },
+    "forecaster": {
+      "calls": 1,
+      "tokens": 4518
+    }
+  }
+}
