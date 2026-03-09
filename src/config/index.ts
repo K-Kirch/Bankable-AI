@@ -56,10 +56,11 @@ export const FEATURES = {
 export const SCORING = {
     /** Risk factor weights (must sum to 1.0) */
     weights: {
-        serviceability: 0.30,
-        concentration: 0.25,
-        retention: 0.25,
-        compliance: 0.20,
+        serviceability: 0.25,
+        concentration: 0.20,
+        retention: 0.20,
+        compliance: 0.15,
+        growth: 0.20,
     },
 
     /** Default scores when data is missing (conservative) */
@@ -68,6 +69,7 @@ export const SCORING = {
         concentration: 45,
         retention: 50,
         compliance: 50,
+        growth: 40,
     },
 
     /** Score thresholds for grade assignment */

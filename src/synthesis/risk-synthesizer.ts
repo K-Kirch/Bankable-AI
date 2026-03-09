@@ -24,6 +24,7 @@ export async function synthesizeRiskFactors(
         concentration: synthesizeConcentration(insights, context),
         retention: synthesizeRetention(insights, context),
         compliance: synthesizeCompliance(insights, context),
+        growth: synthesizeGrowth(insights, context),
     };
 }
 
@@ -378,6 +379,85 @@ function synthesizeCompliance(insights: AgentInsight[], context: GlobalContext):
         weight: 0.20,
         components,
         explanation: generateExplanation('compliance', score, components, relevantInsights),
+    };
+}
+
+function synthesizeGrowth(insights: AgentInsight[], context: GlobalContext): RiskFactor {
+    const relevantInsights = insights.filter(i => i.category === 'growth_trajectory');
+    const components: RiskComponent[] = [];
+
+    // Stripe ARR growth rate
+    const stripe = context.apiSnapshots.stripe;
+    if (stripe?.arrGrowthRate !== undefined) {
+        const growthPct = stripe.arrGrowthRate * 100;
+        // 20%+ growth is excellent, 0% is neutral, negative is bad
+        const growthScore = Math.max(0, Math.min(100, 50 + growthPct * 2));
+        components.push({
+            name: 'ARR Growth Rate',
+            value: growthScore,
+            weight: 0.5,
+            rawMetric: stripe.arrGrowthRate,
+            interpretation: growthPct >= 20 ? 'High growth' : growthPct >= 5 ? 'Moderate growth' : growthPct >= 0 ? 'Flat' : 'Declining',
+        });
+    }
+
+    // Revenue trend from documents (multi-year comparison)
+    const plDoc = context.documents.find(d => d.type === 'profit_and_loss');
+    if (plDoc?.data) {
+        const data = plDoc.data as Record<string, unknown>;
+        const years = Object.keys(data).filter(k => /^\d{4}$/.test(k)).sort().reverse();
+
+        if (years.length >= 2) {
+            const latest = extractNestedValue(data[years[0]!] as Record<string, unknown>, 'revenue') ?? 0;
+            const prior = extractNestedValue(data[years[1]!] as Record<string, unknown>, 'revenue') ?? 0;
+
+            if (prior > 0) {
+                const yoyGrowth = (latest - prior) / prior;
+                const yoyGrowthPct = yoyGrowth * 100;
+                const trendScore = Math.max(0, Math.min(100, 50 + yoyGrowthPct));
+
+                components.push({
+                    name: 'YoY Revenue Growth',
+                    value: trendScore,
+                    weight: 0.5,
+                    rawMetric: yoyGrowth,
+                    interpretation: yoyGrowthPct >= 20 ? 'Strong growth' : yoyGrowthPct >= 5 ? 'Moderate' : yoyGrowthPct >= 0 ? 'Flat' : 'Declining',
+                });
+            }
+        }
+    }
+
+    // Insight-derived growth signals
+    if (relevantInsights.length > 0) {
+        const avgImpact = relevantInsights.reduce((sum, i) => sum + i.impact, 0) / relevantInsights.length;
+        components.push({
+            name: 'Growth Trajectory Signals',
+            value: Math.max(0, Math.min(100, 50 + avgImpact)),
+            weight: components.length === 0 ? 1.0 : 0.3,
+            rawMetric: avgImpact,
+            interpretation: avgImpact > 10 ? 'Positive outlook' : avgImpact < -10 ? 'Concerning outlook' : 'Neutral outlook',
+        });
+    }
+
+    // Fallback when no data
+    if (components.length === 0) {
+        components.push({
+            name: 'Growth Trajectory (estimated)',
+            value: 40,
+            weight: 1.0,
+            rawMetric: null,
+            interpretation: 'Insufficient data - conservative growth assumed',
+        });
+    }
+
+    const score = calculateWeightedScore(components);
+
+    return {
+        name: 'Growth',
+        score: Math.max(0, Math.min(100, score)),
+        weight: 0.20,
+        components,
+        explanation: generateExplanation('growth', score, components, relevantInsights),
     };
 }
 

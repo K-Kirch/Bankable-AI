@@ -25,7 +25,8 @@ export function calculateBankabilityScore(
         riskFactors.serviceability.score * riskFactors.serviceability.weight +
         riskFactors.concentration.score * riskFactors.concentration.weight +
         riskFactors.retention.score * riskFactors.retention.weight +
-        riskFactors.compliance.score * riskFactors.compliance.weight;
+        riskFactors.compliance.score * riskFactors.compliance.weight +
+        riskFactors.growth.score * riskFactors.growth.weight;
 
     // Apply penalty multipliers for critical failures
     const penalties = calculatePenalties(riskFactors);
@@ -137,18 +138,20 @@ function buildReasoningChain(riskFactors: RiskFactorMap, penalties: ScorePenalty
         '## Score Calculation Breakdown',
         '',
         '### Risk Factor Contributions',
-        `- Serviceability (30%): ${riskFactors.serviceability.score.toFixed(1)} × 0.30 = ${(riskFactors.serviceability.score * 0.30).toFixed(1)}`,
-        `- Concentration (25%): ${riskFactors.concentration.score.toFixed(1)} × 0.25 = ${(riskFactors.concentration.score * 0.25).toFixed(1)}`,
-        `- Retention (25%): ${riskFactors.retention.score.toFixed(1)} × 0.25 = ${(riskFactors.retention.score * 0.25).toFixed(1)}`,
-        `- Compliance (20%): ${riskFactors.compliance.score.toFixed(1)} × 0.20 = ${(riskFactors.compliance.score * 0.20).toFixed(1)}`,
+        `- Serviceability (25%): ${riskFactors.serviceability.score.toFixed(1)} × 0.25 = ${(riskFactors.serviceability.score * 0.25).toFixed(1)}`,
+        `- Concentration (20%): ${riskFactors.concentration.score.toFixed(1)} × 0.20 = ${(riskFactors.concentration.score * 0.20).toFixed(1)}`,
+        `- Retention (20%): ${riskFactors.retention.score.toFixed(1)} × 0.20 = ${(riskFactors.retention.score * 0.20).toFixed(1)}`,
+        `- Compliance (15%): ${riskFactors.compliance.score.toFixed(1)} × 0.15 = ${(riskFactors.compliance.score * 0.15).toFixed(1)}`,
+        `- Growth (20%): ${riskFactors.growth.score.toFixed(1)} × 0.20 = ${(riskFactors.growth.score * 0.20).toFixed(1)}`,
         '',
     ];
 
     const rawScore =
-        riskFactors.serviceability.score * 0.30 +
-        riskFactors.concentration.score * 0.25 +
-        riskFactors.retention.score * 0.25 +
-        riskFactors.compliance.score * 0.20;
+        riskFactors.serviceability.score * 0.25 +
+        riskFactors.concentration.score * 0.20 +
+        riskFactors.retention.score * 0.20 +
+        riskFactors.compliance.score * 0.15 +
+        riskFactors.growth.score * 0.20;
 
     lines.push(`**Raw Score**: ${rawScore.toFixed(1)}`);
 

@@ -87,6 +87,7 @@ function estimateDifficulty(factor: keyof RiskFactorMap, gap: number): 'low' | '
         concentration: 3,  // Takes time to diversify
         retention: 2,      // Contract renegotiation possible
         compliance: 1,     // Often quick document uploads
+        growth: 3,         // Organic growth takes time
     };
 
     const adjustedDifficulty = baseDifficulty[factor] + (gap > 30 ? 1 : 0);
@@ -102,6 +103,7 @@ function estimateDays(factor: keyof RiskFactorMap, gap: number): number {
         concentration: 180,
         retention: 60,
         compliance: 14,
+        growth: 120,
     };
 
     return Math.round(baseDays[factor] * (gap / 50));
@@ -124,6 +126,7 @@ async function generateTasks(
             concentration: { score: drag.currentScore },
             retention: { score: drag.currentScore },
             compliance: { score: drag.currentScore },
+            growth: { score: drag.currentScore },
         }[drag.factor];
         const dragTasks = generateTasksForDrag(drag, factorData, context);
         tasks.push(...dragTasks);
@@ -281,6 +284,34 @@ function generateTasksForDrag(
                     'Identify gaps',
                     'Obtain quotes',
                     'Update policies',
+                ],
+            },
+        ],
+        growth: [
+            {
+                title: 'Accelerate revenue growth',
+                description: 'Implement initiatives to increase revenue trajectory and demonstrate scalability.',
+                category: 'strategic',
+                difficulty: 'high',
+                estimatedDays: 120,
+                actionItems: [
+                    'Analyze current growth channels',
+                    'Invest in highest-ROI acquisition channels',
+                    'Implement referral and expansion programs',
+                    'Track and optimize unit economics',
+                ],
+            },
+            {
+                title: 'Diversify revenue streams',
+                description: 'Create new product lines or upsell paths to drive revenue growth.',
+                category: 'strategic',
+                difficulty: 'high',
+                estimatedDays: 90,
+                actionItems: [
+                    'Identify adjacent opportunities',
+                    'Develop pricing for new offerings',
+                    'Launch pilot with existing customers',
+                    'Measure and iterate on results',
                 ],
             },
         ],

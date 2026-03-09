@@ -222,6 +222,7 @@ interface ObviousResultOptions {
     concentrationOverride?: number;
     retentionOverride?: number;
     complianceOverride?: number;
+    growthOverride?: number;
 }
 
 function createObviousResult(
@@ -273,6 +274,7 @@ function createMinimalRiskFactors(baseScore: number, options: ObviousResultOptio
         concentration: createFactor('Concentration', options.concentrationOverride),
         retention: createFactor('Retention', options.retentionOverride),
         compliance: createFactor('Compliance', options.complianceOverride),
+        growth: createFactor('Growth', options.growthOverride),
     };
 }
 

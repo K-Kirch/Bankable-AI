@@ -63,13 +63,27 @@ const AGENT_DOMAINS: Record<AgentId, { primary: string[]; avoid: string[] }> = {
             'Growth trajectory projections',
             'Scenario analysis and stress testing',
             'Default probability estimation',
-            'Market and external risks',
             'Long-term viability',
         ],
         avoid: [
             'Current financial state (Counter domain)',
             'Contract details (Lawyer domain)',
             'Historical compliance (Lawyer domain)',
+            'Industry benchmarks (Market domain)',
+        ],
+    },
+    market: {
+        primary: [
+            'Industry positioning and competitive landscape',
+            'Market sizing and penetration',
+            'Sector-specific risk factors',
+            'Growth trajectory sustainability',
+            'Pricing power and margin benchmarking',
+        ],
+        avoid: [
+            'Cash flow calculations (Counter domain)',
+            'Contract terms (Lawyer domain)',
+            'Stress test scenarios (Forecaster domain)',
         ],
     },
 };
@@ -88,7 +102,7 @@ export const CONTEXT_PROVIDERS: ContextProvider[] = [
 
             return `
 AGENT COORDINATION RULES:
-You are ONE of THREE specialized agents analyzing this company. To avoid overlap:
+You are ONE of FOUR specialized agents analyzing this company. To avoid overlap:
 
 YOUR PRIMARY FOCUS (score these):
 ${domain.primary.map(p => `• ${p}`).join('\n')}

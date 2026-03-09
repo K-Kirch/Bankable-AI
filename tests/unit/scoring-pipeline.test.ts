@@ -49,7 +49,7 @@ function createInsight(overrides: Partial<AgentInsight> = {}): AgentInsight {
 // ============================================
 
 describe('synthesizeRiskFactors', () => {
-    it('returns all four risk factors', async () => {
+    it('returns all five risk factors', async () => {
         const context = createMinimalContext();
         const result = await synthesizeRiskFactors([], context);
 
@@ -57,20 +57,17 @@ describe('synthesizeRiskFactors', () => {
         expect(result).toHaveProperty('concentration');
         expect(result).toHaveProperty('retention');
         expect(result).toHaveProperty('compliance');
+        expect(result).toHaveProperty('growth');
     });
 
     it('all scores are between 0 and 100', async () => {
         const context = createMinimalContext();
         const result = await synthesizeRiskFactors([], context);
 
-        expect(result.serviceability.score).toBeGreaterThanOrEqual(0);
-        expect(result.serviceability.score).toBeLessThanOrEqual(100);
-        expect(result.concentration.score).toBeGreaterThanOrEqual(0);
-        expect(result.concentration.score).toBeLessThanOrEqual(100);
-        expect(result.retention.score).toBeGreaterThanOrEqual(0);
-        expect(result.retention.score).toBeLessThanOrEqual(100);
-        expect(result.compliance.score).toBeGreaterThanOrEqual(0);
-        expect(result.compliance.score).toBeLessThanOrEqual(100);
+        for (const factor of Object.values(result)) {
+            expect(factor.score).toBeGreaterThanOrEqual(0);
+            expect(factor.score).toBeLessThanOrEqual(100);
+        }
     });
 
     it('uses category-based routing for retention, not title matching', async () => {
@@ -147,15 +144,39 @@ describe('synthesizeRiskFactors', () => {
         expect(profitComponent!.value).toBeGreaterThan(0);
     });
 
+    it('derives growth score from revenue trends in documents', async () => {
+        const context = createMinimalContext({
+            documents: [{
+                id: 'pl-1',
+                type: 'profit_and_loss',
+                filename: 'pl.json',
+                parsedAt: new Date(),
+                confidence: 1.0,
+                data: {
+                    '2023': { revenue: 800000, netIncome: 50000 },
+                    '2024': { revenue: 1000000, netIncome: 80000 },
+                },
+                rawText: '',
+                trustScore: 0.9,
+            }],
+        });
+
+        const result = await synthesizeRiskFactors([], context);
+
+        const yoyComponent = result.growth.components.find(c => c.name === 'YoY Revenue Growth');
+        expect(yoyComponent).toBeDefined();
+        // 25% yoy growth → 50 + 25 = 75
+        expect(yoyComponent!.value).toBe(75);
+    });
+
     it('provides fallback scores when no data is available', async () => {
         const context = createMinimalContext();
         const result = await synthesizeRiskFactors([], context);
 
-        // All factors should have at least one component with a fallback/estimated label
-        expect(result.serviceability.components.length).toBeGreaterThan(0);
-        expect(result.concentration.components.length).toBeGreaterThan(0);
-        expect(result.retention.components.length).toBeGreaterThan(0);
-        expect(result.compliance.components.length).toBeGreaterThan(0);
+        // All factors should have at least one component
+        for (const factor of Object.values(result)) {
+            expect(factor.components.length).toBeGreaterThan(0);
+        }
     });
 });
 
@@ -169,22 +190,27 @@ describe('calculateBankabilityScore', () => {
         concentration: number;
         retention: number;
         compliance: number;
+        growth: number;
     }): RiskFactorMap {
         return {
             serviceability: {
-                name: 'Serviceability', score: scores.serviceability, weight: 0.30,
+                name: 'Serviceability', score: scores.serviceability, weight: 0.25,
                 components: [], explanation: '',
             },
             concentration: {
-                name: 'Concentration', score: scores.concentration, weight: 0.25,
+                name: 'Concentration', score: scores.concentration, weight: 0.20,
                 components: [], explanation: '',
             },
             retention: {
-                name: 'Retention', score: scores.retention, weight: 0.25,
+                name: 'Retention', score: scores.retention, weight: 0.20,
                 components: [], explanation: '',
             },
             compliance: {
-                name: 'Compliance', score: scores.compliance, weight: 0.20,
+                name: 'Compliance', score: scores.compliance, weight: 0.15,
+                components: [], explanation: '',
+            },
+            growth: {
+                name: 'Growth', score: scores.growth, weight: 0.20,
                 components: [], explanation: '',
             },
         };
@@ -193,12 +219,12 @@ describe('calculateBankabilityScore', () => {
     it('calculates weighted average correctly', () => {
         const context = createMinimalContext();
         const factors = createRiskFactors({
-            serviceability: 80, concentration: 60, retention: 70, compliance: 90,
+            serviceability: 80, concentration: 60, retention: 70, compliance: 90, growth: 75,
         });
 
         const result = calculateBankabilityScore(factors, context);
 
-        // 80*0.30 + 60*0.25 + 70*0.25 + 90*0.20 = 24+15+17.5+18 = 74.5 → 75 (rounded)
+        // 80*0.25 + 60*0.20 + 70*0.20 + 90*0.15 + 75*0.20 = 20+12+14+13.5+15 = 74.5 → 75
         expect(result.score).toBe(75);
     });
 
@@ -206,19 +232,19 @@ describe('calculateBankabilityScore', () => {
         const context = createMinimalContext();
 
         const gradeA = calculateBankabilityScore(
-            createRiskFactors({ serviceability: 90, concentration: 85, retention: 80, compliance: 85 }),
+            createRiskFactors({ serviceability: 90, concentration: 85, retention: 80, compliance: 85, growth: 90 }),
             context,
         );
         expect(gradeA.grade).toBe('A');
 
         const gradeC = calculateBankabilityScore(
-            createRiskFactors({ serviceability: 55, concentration: 55, retention: 55, compliance: 55 }),
+            createRiskFactors({ serviceability: 55, concentration: 55, retention: 55, compliance: 55, growth: 55 }),
             context,
         );
         expect(gradeC.grade).toBe('C');
 
         const gradeF = calculateBankabilityScore(
-            createRiskFactors({ serviceability: 20, concentration: 20, retention: 20, compliance: 20 }),
+            createRiskFactors({ serviceability: 20, concentration: 20, retention: 20, compliance: 20, growth: 20 }),
             context,
         );
         expect(gradeF.grade).toBe('F');
@@ -227,22 +253,22 @@ describe('calculateBankabilityScore', () => {
     it('applies compliance penalty when < 40', () => {
         const context = createMinimalContext();
         const factors = createRiskFactors({
-            serviceability: 80, concentration: 80, retention: 80, compliance: 30,
+            serviceability: 80, concentration: 80, retention: 80, compliance: 30, growth: 80,
         });
 
         const result = calculateBankabilityScore(factors, context);
 
         expect(result.penalties.length).toBeGreaterThan(0);
         expect(result.penalties.some(p => p.reason.includes('compliance'))).toBe(true);
-        // Raw = 80*0.30+80*0.25+80*0.25+30*0.20 = 24+20+20+6 = 70
-        // With 0.8 penalty: 70*0.8 = 56
-        expect(result.score).toBeLessThan(70);
+        // Raw = 80*0.25+80*0.20+80*0.20+30*0.15+80*0.20 = 20+16+16+4.5+16 = 72.5
+        // With 0.8 penalty: 72.5*0.8 = 58
+        expect(result.score).toBeLessThan(73);
     });
 
     it('applies serviceability penalty when < 30', () => {
         const context = createMinimalContext();
         const factors = createRiskFactors({
-            serviceability: 20, concentration: 80, retention: 80, compliance: 80,
+            serviceability: 20, concentration: 80, retention: 80, compliance: 80, growth: 80,
         });
 
         const result = calculateBankabilityScore(factors, context);
@@ -253,7 +279,7 @@ describe('calculateBankabilityScore', () => {
     it('applies concentration penalty when < 25', () => {
         const context = createMinimalContext();
         const factors = createRiskFactors({
-            serviceability: 80, concentration: 20, retention: 80, compliance: 80,
+            serviceability: 80, concentration: 20, retention: 80, compliance: 80, growth: 80,
         });
 
         const result = calculateBankabilityScore(factors, context);
@@ -265,13 +291,13 @@ describe('calculateBankabilityScore', () => {
         const context = createMinimalContext();
 
         const high = calculateBankabilityScore(
-            createRiskFactors({ serviceability: 100, concentration: 100, retention: 100, compliance: 100 }),
+            createRiskFactors({ serviceability: 100, concentration: 100, retention: 100, compliance: 100, growth: 100 }),
             context,
         );
         expect(high.score).toBeLessThanOrEqual(100);
 
         const low = calculateBankabilityScore(
-            createRiskFactors({ serviceability: 0, concentration: 0, retention: 0, compliance: 0 }),
+            createRiskFactors({ serviceability: 0, concentration: 0, retention: 0, compliance: 0, growth: 0 }),
             context,
         );
         expect(low.score).toBeGreaterThanOrEqual(0);
@@ -280,7 +306,7 @@ describe('calculateBankabilityScore', () => {
     it('includes explanation with strengths, weaknesses, and critical issues', () => {
         const context = createMinimalContext();
         const factors = createRiskFactors({
-            serviceability: 85, concentration: 40, retention: 60, compliance: 30,
+            serviceability: 85, concentration: 40, retention: 60, compliance: 30, growth: 70,
         });
 
         const result = calculateBankabilityScore(factors, context);

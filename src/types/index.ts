@@ -34,7 +34,7 @@ export interface GlobalContext {
     contradictions: Contradiction[];
 }
 
-export type AgentId = 'counter' | 'lawyer' | 'forecaster';
+export type AgentId = 'counter' | 'lawyer' | 'forecaster' | 'market';
 
 // ============================================
 // DOCUMENT TYPES
@@ -183,6 +183,7 @@ export interface RiskFactorMap {
     concentration: RiskFactor;
     retention: RiskFactor;
     compliance: RiskFactor;
+    growth: RiskFactor;
 }
 
 export interface RiskFactor {

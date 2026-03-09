@@ -275,10 +275,11 @@ export class GlobalContextService {
 
     private createEmptyRiskFactors(): RiskFactorMap {
         return {
-            serviceability: { name: 'Serviceability', score: 0, weight: 0.30, components: [], explanation: '' },
-            concentration: { name: 'Concentration', score: 0, weight: 0.25, components: [], explanation: '' },
-            retention: { name: 'Retention', score: 0, weight: 0.25, components: [], explanation: '' },
-            compliance: { name: 'Compliance', score: 0, weight: 0.20, components: [], explanation: '' },
+            serviceability: { name: 'Serviceability', score: 0, weight: 0.25, components: [], explanation: '' },
+            concentration: { name: 'Concentration', score: 0, weight: 0.20, components: [], explanation: '' },
+            retention: { name: 'Retention', score: 0, weight: 0.20, components: [], explanation: '' },
+            compliance: { name: 'Compliance', score: 0, weight: 0.15, components: [], explanation: '' },
+            growth: { name: 'Growth', score: 0, weight: 0.20, components: [], explanation: '' },
         };
     }
 }

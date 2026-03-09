@@ -11,6 +11,7 @@ import { createGlobalContext } from '../core/global-context.js';
 import { CounterAgent } from '../agents/counter-agent.js';
 import { LawyerAgent } from '../agents/lawyer-agent.js';
 import { ForecasterAgent } from '../agents/forecaster-agent.js';
+import { MarketAgent } from '../agents/market-agent.js';
 import { PDFParser } from '../ingestion/pdf-parser.js';
 import { StripeAdapter } from '../ingestion/stripe-adapter.js';
 import { PlaidAdapter } from '../ingestion/plaid-adapter.js';
@@ -34,6 +35,7 @@ function createOrchestrator(contextService?: ReturnType<typeof createGlobalConte
     orchestrator.registerAgent(new CounterAgent());
     orchestrator.registerAgent(new LawyerAgent());
     orchestrator.registerAgent(new ForecasterAgent());
+    orchestrator.registerAgent(new MarketAgent());
     return orchestrator;
 }
 
