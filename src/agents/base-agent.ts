@@ -15,7 +15,9 @@ import type {
     Evidence,
 } from '../types/index.js';
 import type { MessageBus, Message } from '../core/message-bus.js';
-import { AuditTrail, getAuditTrail, hasAuditTrail, createAuditTrail } from '../core/audit-trail.js';
+import type { AuditTrail } from '../core/audit-trail.js';
+import { MODEL_CONFIG } from '../config/index.js';
+import { LLMAnalysisResponseSchema, safeParseLLMResponse } from '../validation/schemas.js';
 import { detectIndustry, getIndustryBaselinePrompt } from '../prompts/industry-baselines.js';
 import { getCalibrationPrompt } from '../prompts/calibration-cases.js';
 import { getAllContext } from '../prompts/context-providers.js';
@@ -70,11 +72,11 @@ export abstract class BaseAgent {
 
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({
-            model: 'gemini-1.5-pro',
+            model: MODEL_CONFIG.name,
             generationConfig: {
-                temperature: 0.3,
+                temperature: MODEL_CONFIG.temperature,
                 topP: 0.95,
-                maxOutputTokens: 8192,
+                maxOutputTokens: MODEL_CONFIG.maxOutputTokens,
             },
         });
     }
@@ -82,14 +84,10 @@ export abstract class BaseAgent {
     /**
      * Execute the agent's analysis (pure LLM approach)
      */
-    async execute(context: GlobalContext, bus: MessageBus): Promise<AgentInsight[]> {
+    async execute(context: GlobalContext, bus: MessageBus, auditTrail: AuditTrail): Promise<AgentInsight[]> {
         this.context = context;
         this.messageBus = bus;
-
-        // Get or create audit trail
-        this.auditTrail = hasAuditTrail()
-            ? getAuditTrail()
-            : createAuditTrail(context.sessionId);
+        this.auditTrail = auditTrail;
 
         // Subscribe to messages
         this.unsubscribe = bus.subscribe(this.id, this.handleMessage.bind(this));
@@ -231,11 +229,16 @@ IMPORTANT: Keep impact scores moderate (-40 to +40 range). Only use extreme scor
         let retryCount = 0;
         let rawText = '';
         let parsed: T | null = null;
+        let usageMetadata: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number } | undefined;
 
         // Attempt with retry
         while (retryCount < 3) {
             try {
                 const result = await this.model.generateContent(prompt);
+
+                // Extract actual token counts from Gemini API response
+                usageMetadata = result.response.usageMetadata;
+
                 rawText = result.response.text().trim();
 
                 // Clean up markdown if present
@@ -264,6 +267,11 @@ IMPORTANT: Keep impact scores moderate (-40 to +40 range). Only use extreme scor
 
         const latencyMs = Date.now() - startTime;
 
+        // Use actual token counts from the API, fall back to estimate only if unavailable
+        const promptTokens = usageMetadata?.promptTokenCount ?? Math.ceil(prompt.length / 4);
+        const completionTokens = usageMetadata?.candidatesTokenCount ?? Math.ceil(rawText.length / 4);
+        const totalTokens = usageMetadata?.totalTokenCount ?? (promptTokens + completionTokens);
+
         // Log to audit trail
         const auditEntry = this.auditTrail?.log({
             agentId: this.id,
@@ -271,11 +279,11 @@ IMPORTANT: Keep impact scores moderate (-40 to +40 range). Only use extreme scor
             inputData,
             rawResponse: rawText,
             parsedResponse: parsed,
-            modelUsed: 'gemini-1.5-pro',
+            modelUsed: MODEL_CONFIG.name,
             tokenCount: {
-                prompt: Math.ceil(prompt.length / 4), // Rough estimate
-                completion: Math.ceil(rawText.length / 4),
-                total: Math.ceil((prompt.length + rawText.length) / 4),
+                prompt: promptTokens,
+                completion: completionTokens,
+                total: totalTokens,
             },
             latencyMs,
             confidence: 1.0, // Will be updated per-insight

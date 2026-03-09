@@ -17,11 +17,6 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
-    "@langchain/core": "^0.3.0",
-    "@langchain/google-genai": "^0.1.0",
-    "@langchain/langgraph": "^0.2.0",
-    "bullmq": "^5.0.0",
-    "chromadb": "^1.9.0",
     "dotenv": "^17.2.3",
     "express": "^4.21.0",
     "ioredis": "^5.4.0",

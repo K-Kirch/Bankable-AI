@@ -7,6 +7,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { v4 as uuid } from 'uuid';
 import type { ParsedDocument, DocumentType } from '../types/index.js';
+import { VISION_MODEL_CONFIG } from '../config/index.js';
 
 export class PDFParser {
     private genAI: GoogleGenerativeAI;
@@ -20,7 +21,11 @@ export class PDFParser {
 
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({
-            model: 'gemini-1.5-pro',
+            model: VISION_MODEL_CONFIG.name,
+            generationConfig: {
+                temperature: VISION_MODEL_CONFIG.temperature,
+                maxOutputTokens: VISION_MODEL_CONFIG.maxOutputTokens,
+            },
         });
     }
 

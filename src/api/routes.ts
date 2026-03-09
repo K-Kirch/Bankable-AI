@@ -6,23 +6,36 @@
 
 import express, { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
-import { getOrchestrator } from '../core/orchestrator.js';
-import { getGlobalContext } from '../core/global-context.js';
+import { AgentOrchestrator } from '../core/orchestrator.js';
+import { createGlobalContext } from '../core/global-context.js';
 import { CounterAgent } from '../agents/counter-agent.js';
 import { LawyerAgent } from '../agents/lawyer-agent.js';
 import { ForecasterAgent } from '../agents/forecaster-agent.js';
 import { PDFParser } from '../ingestion/pdf-parser.js';
 import { StripeAdapter } from '../ingestion/stripe-adapter.js';
 import { PlaidAdapter } from '../ingestion/plaid-adapter.js';
+import { apiKeyAuth } from './auth.js';
+import { rateLimiter } from './rate-limit.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Initialize orchestrator with agents
-const orchestrator = getOrchestrator();
-orchestrator.registerAgent(new CounterAgent());
-orchestrator.registerAgent(new LawyerAgent());
-orchestrator.registerAgent(new ForecasterAgent());
+// Apply rate limiting first, then authentication
+router.use(rateLimiter);
+router.use(apiKeyAuth);
+
+
+/**
+ * Create a fresh orchestrator with all agents registered.
+ * Each analysis request gets its own isolated instance.
+ */
+function createOrchestrator(contextService?: ReturnType<typeof createGlobalContext>): AgentOrchestrator {
+    const orchestrator = new AgentOrchestrator(contextService);
+    orchestrator.registerAgent(new CounterAgent());
+    orchestrator.registerAgent(new LawyerAgent());
+    orchestrator.registerAgent(new ForecasterAgent());
+    return orchestrator;
+}
 
 // ============================================
 // ANALYSIS ENDPOINTS
@@ -41,6 +54,8 @@ router.post('/analyze', async (req: Request, res: Response, next: NextFunction) 
             return;
         }
 
+        // Create fresh orchestrator per request (no shared state)
+        const orchestrator = createOrchestrator();
         const result = await orchestrator.analyze(companyId);
 
         res.json({
@@ -66,6 +81,12 @@ router.post('/analyze', async (req: Request, res: Response, next: NextFunction) 
  */
 router.post('/test/analyze-fixture', async (req: Request, res: Response, next: NextFunction) => {
     try {
+        // Guard: only available in development
+        if (process.env.NODE_ENV === 'production') {
+            res.status(404).json({ error: 'Not found' });
+            return;
+        }
+
         const { fixture } = req.body;
 
         if (!fixture || !fixture.company) {
@@ -73,7 +94,8 @@ router.post('/test/analyze-fixture', async (req: Request, res: Response, next: N
             return;
         }
 
-        const context = getGlobalContext();
+        // Create isolated context and orchestrator for this test
+        const context = createGlobalContext();
         await context.createSession(fixture.company.name || 'Test Company');
 
         // Inject P&L as parsed document
@@ -104,7 +126,8 @@ router.post('/test/analyze-fixture', async (req: Request, res: Response, next: N
             });
         }
 
-        // Run the analysis
+        // Run the analysis with isolated orchestrator
+        const orchestrator = createOrchestrator(context);
         const result = await orchestrator.analyze(fixture.company.name);
 
         res.json({
@@ -122,22 +145,15 @@ router.post('/test/analyze-fixture', async (req: Request, res: Response, next: N
 /**
  * GET /api/analyze/:sessionId/status
  * Get the status of an ongoing analysis
+ * 
+ * NOTE: With per-request orchestrators, status tracking requires
+ * external storage (Redis/DB). For now, this returns a simplified status.
  */
-router.get('/analyze/:sessionId/status', async (req: Request, res: Response) => {
-    const status = orchestrator.getStatus();
-
-    if (!status || status.sessionId !== req.params.sessionId) {
-        res.status(404).json({ error: 'Session not found' });
-        return;
-    }
-
-    res.json({
-        sessionId: status.sessionId,
-        status: status.status,
-        agentStatuses: Object.fromEntries(status.agentStatuses),
-        errors: status.errors.map(e => e.message),
-        startTime: status.startTime,
-        endTime: status.endTime,
+router.get('/analyze/:sessionId/status', async (_req: Request, res: Response) => {
+    // TODO: Implement persistent status tracking via database
+    res.status(501).json({
+        error: 'Status tracking requires persistent storage (planned for Phase 3)',
+        message: 'Analysis is synchronous — the result is returned directly from POST /api/analyze',
     });
 });
 
@@ -147,11 +163,10 @@ router.get('/analyze/:sessionId/status', async (req: Request, res: Response) => 
 
 /**
  * POST /api/documents
- * Upload and parse a document
+ * Upload and parse a document (standalone, not tied to a session)
  */
 router.post('/documents', upload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { sessionId } = req.body;
         const file = req.file;
 
         if (!file) {
@@ -161,12 +176,6 @@ router.post('/documents', upload.single('file'), async (req: Request, res: Respo
 
         const parser = new PDFParser();
         const document = await parser.parse(file.buffer, file.originalname);
-
-        if (sessionId) {
-            const context = getGlobalContext();
-            await context.loadSession(sessionId);
-            await context.addDocument(document);
-        }
 
         res.json({
             success: true,
@@ -188,20 +197,12 @@ router.post('/documents', upload.single('file'), async (req: Request, res: Respo
 
 /**
  * POST /api/integrations/stripe
- * Fetch Stripe data and add to session
+ * Fetch Stripe data snapshot
  */
-router.post('/integrations/stripe', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/integrations/stripe', async (_req: Request, res: Response, next: NextFunction) => {
     try {
-        const { sessionId } = req.body;
-
         const adapter = new StripeAdapter();
         const snapshot = await adapter.fetchSnapshot();
-
-        if (sessionId) {
-            const context = getGlobalContext();
-            await context.loadSession(sessionId);
-            await context.setStripeSnapshot(snapshot);
-        }
 
         res.json({
             success: true,
@@ -245,7 +246,7 @@ router.post('/integrations/plaid/link', async (req: Request, res: Response, next
  */
 router.post('/integrations/plaid/exchange', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { publicToken, sessionId } = req.body;
+        const { publicToken } = req.body;
 
         if (!publicToken) {
             res.status(400).json({ error: 'publicToken is required' });
@@ -255,12 +256,6 @@ router.post('/integrations/plaid/exchange', async (req: Request, res: Response, 
         const adapter = new PlaidAdapter();
         const accessToken = await adapter.exchangeToken(publicToken);
         const snapshot = await adapter.fetchSnapshot(accessToken);
-
-        if (sessionId) {
-            const context = getGlobalContext();
-            await context.loadSession(sessionId);
-            await context.setPlaidSnapshot(snapshot);
-        }
 
         res.json({
             success: true,
@@ -291,46 +286,13 @@ router.post('/sessions', async (req: Request, res: Response, next: NextFunction)
             return;
         }
 
-        const context = getGlobalContext();
+        const context = createGlobalContext();
         const session = await context.createSession(companyId);
 
         res.json({
             success: true,
             sessionId: session.sessionId,
             companyId: session.companyId,
-        });
-    } catch (error) {
-        next(error);
-    }
-});
-
-/**
- * GET /api/sessions/:sessionId
- * Get session details
- */
-router.get('/sessions/:sessionId', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { sessionId } = req.params;
-        if (!sessionId || Array.isArray(sessionId)) {
-            res.status(400).json({ error: 'sessionId is required' });
-            return;
-        }
-        const context = getGlobalContext();
-        const session = await context.loadSession(sessionId as string);
-
-        if (!session) {
-            res.status(404).json({ error: 'Session not found' });
-            return;
-        }
-
-        res.json({
-            sessionId: session.sessionId,
-            companyId: session.companyId,
-            startedAt: session.startedAt,
-            documentCount: session.documents.length,
-            hasStripe: !!session.apiSnapshots.stripe,
-            hasPlaid: !!session.apiSnapshots.plaid,
-            insightCount: Array.from(session.agentInsights.values()).flat().length,
         });
     } catch (error) {
         next(error);
@@ -350,3 +312,5 @@ router.use((error: Error, _req: Request, res: Response, _next: NextFunction) => 
 });
 
 export { router as apiRouter };
+
+

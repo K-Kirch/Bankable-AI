@@ -283,12 +283,11 @@ export class GlobalContextService {
     }
 }
 
-// Singleton instance
-let instance: GlobalContextService | null = null;
-
-export function getGlobalContext(): GlobalContextService {
-    if (!instance) {
-        instance = new GlobalContextService();
-    }
-    return instance;
+/**
+ * Create a new GlobalContextService instance.
+ * Each analysis request should create its own instance
+ * to prevent state corruption between concurrent requests.
+ */
+export function createGlobalContext(redisUrl?: string): GlobalContextService {
+    return new GlobalContextService(redisUrl);
 }

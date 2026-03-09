@@ -251,16 +251,17 @@ function synthesizeRetention(insights: AgentInsight[], context: GlobalContext): 
     const relevantInsights = insights.filter(i => i.category === 'contract_security');
     const components: RiskComponent[] = [];
 
-    // Contract strength from insights
-    const contractInsight = relevantInsights.find(i => i.title.includes('Contract Strength'));
-    if (contractInsight) {
-        const match = contractInsight.title.match(/(\d+)\/100/);
-        const strength = match ? parseInt(match[1] ?? '50', 10) : 50;
+    // Contract strength from category-matched insights (no brittle title matching)
+    if (relevantInsights.length > 0) {
+        const avgImpact = relevantInsights.reduce((sum, i) => sum + i.impact, 0) / relevantInsights.length;
+        const avgConfidence = relevantInsights.reduce((sum, i) => sum + i.confidence, 0) / relevantInsights.length;
+        // impact is -50..+50, map to 0..100
+        const strength = Math.max(0, Math.min(100, 50 + avgImpact));
         components.push({
             name: 'Contract Strength',
             value: strength,
             weight: 0.5,
-            rawMetric: strength,
+            rawMetric: { avgImpact, avgConfidence, insightCount: relevantInsights.length },
             interpretation: strength >= 70 ? 'Strong protection' : strength >= 50 ? 'Moderate' : 'Weak protection',
         });
     }
@@ -331,16 +332,17 @@ function synthesizeCompliance(insights: AgentInsight[], context: GlobalContext):
     const relevantInsights = insights.filter(i => i.category === 'compliance_status');
     const components: RiskComponent[] = [];
 
-    // Compliance score from insights
-    const complianceInsight = relevantInsights.find(i => i.title.includes('Compliance Score'));
-    if (complianceInsight) {
-        const match = complianceInsight.title.match(/(\d+)\/100/);
-        const score = match ? parseInt(match[1] ?? '50', 10) : 50;
+    // Compliance score from category-matched insights (no brittle title matching)
+    if (relevantInsights.length > 0) {
+        const avgImpact = relevantInsights.reduce((sum, i) => sum + i.impact, 0) / relevantInsights.length;
+        const avgConfidence = relevantInsights.reduce((sum, i) => sum + i.confidence, 0) / relevantInsights.length;
+        // impact is -50..+50, map to 0..100
+        const score = Math.max(0, Math.min(100, 50 + avgImpact));
         components.push({
             name: 'Regulatory Compliance',
             value: score,
             weight: 0.6,
-            rawMetric: score,
+            rawMetric: { avgImpact, avgConfidence, insightCount: relevantInsights.length },
             interpretation: score >= 80 ? 'Fully compliant' : score >= 60 ? 'Mostly compliant' : 'Gaps present',
         });
     } else {

@@ -129,9 +129,38 @@ export class StripeAdapter {
     }
 
     private async calculateGrowthRate(): Promise<number> {
-        // Compare current MRR to 3 months ago
-        // Simplified: would need historical data in production
-        return 0.15; // Placeholder 15% growth
+        // Compare invoice revenue from the last 90 days vs the prior 90-day period
+        const now = Math.floor(Date.now() / 1000);
+        const ninetyDaysAgo = now - (90 * 24 * 60 * 60);
+        const oneEightyDaysAgo = now - (180 * 24 * 60 * 60);
+
+        try {
+            const [recentInvoices, priorInvoices] = await Promise.all([
+                this.stripe.invoices.list({
+                    status: 'paid',
+                    created: { gte: ninetyDaysAgo },
+                    limit: 100,
+                }),
+                this.stripe.invoices.list({
+                    status: 'paid',
+                    created: { gte: oneEightyDaysAgo, lt: ninetyDaysAgo },
+                    limit: 100,
+                }),
+            ]);
+
+            const recentRevenue = recentInvoices.data.reduce((sum, inv) => sum + inv.amount_paid, 0);
+            const priorRevenue = priorInvoices.data.reduce((sum, inv) => sum + inv.amount_paid, 0);
+
+            if (priorRevenue === 0) {
+                // No prior data to compare — can't calculate growth
+                return recentRevenue > 0 ? 1.0 : 0;
+            }
+
+            return (recentRevenue - priorRevenue) / priorRevenue;
+        } catch {
+            // If Stripe API fails, return 0 rather than a fake number
+            return 0;
+        }
     }
 
     private async calculateChurnRate(): Promise<number> {

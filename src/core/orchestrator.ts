@@ -13,8 +13,9 @@ import type {
     BankabilityScore,
     RemediationRoadmap,
 } from '../types/index.js';
-import { GlobalContextService, getGlobalContext } from './global-context.js';
+import { GlobalContextService, createGlobalContext } from './global-context.js';
 import { MessageBus } from './message-bus.js';
+import { AuditTrail, createAuditTrail } from './audit-trail.js';
 
 // ============================================
 // AGENT INTERFACE
@@ -29,8 +30,9 @@ export interface Agent {
      * Execute the agent's analysis
      * @param context - Shared global context
      * @param bus - Message bus for inter-agent communication
+     * @param auditTrail - Audit trail for this analysis session
      */
-    execute(context: GlobalContext, bus: MessageBus): Promise<AgentInsight[]>;
+    execute(context: GlobalContext, bus: MessageBus, auditTrail: AuditTrail): Promise<AgentInsight[]>;
 }
 
 // ============================================
@@ -55,10 +57,18 @@ export class AgentOrchestrator {
     private messageBus: MessageBus;
     private agents: Map<AgentId, Agent> = new Map();
     private state: OrchestratorState | null = null;
+    private auditTrail: AuditTrail | null = null;
 
-    constructor() {
-        this.contextService = getGlobalContext();
+    constructor(contextService?: GlobalContextService) {
+        this.contextService = contextService ?? createGlobalContext();
         this.messageBus = new MessageBus();
+    }
+
+    /**
+     * Get the context service (for external document/data injection)
+     */
+    getContextService(): GlobalContextService {
+        return this.contextService;
     }
 
     /**
@@ -91,6 +101,9 @@ export class AgentOrchestrator {
             context = await this.contextService.createSession(companyId);
         }
 
+        // Create a fresh audit trail for this analysis
+        this.auditTrail = createAuditTrail(context.sessionId);
+
         this.state = {
             sessionId: context.sessionId,
             status: 'initializing',
@@ -119,6 +132,13 @@ export class AgentOrchestrator {
      */
     getStatus(): OrchestratorState | null {
         return this.state;
+    }
+
+    /**
+     * Get the audit trail for this analysis
+     */
+    getAuditTrail(): AuditTrail | null {
+        return this.auditTrail;
     }
 
     // ============================================
@@ -167,7 +187,7 @@ export class AgentOrchestrator {
             this.state!.agentStatuses.set(agent.id, 'running');
 
             try {
-                const insights = await agent.execute(context, this.messageBus);
+                const insights = await agent.execute(context, this.messageBus, this.auditTrail!);
 
                 // Persist insights to global context
                 for (const insight of insights) {
@@ -177,23 +197,14 @@ export class AgentOrchestrator {
                 this.state!.agentStatuses.set(agent.id, 'complete');
                 return insights;
             } catch (error) {
+                console.error(`[Orchestrator] Agent ${agent.id} failed:`, error);
                 this.state!.agentStatuses.set(agent.id, 'error');
                 this.state!.errors.push(error as Error);
-                return [];
+                return []; // Continue with other agents
             }
         });
 
         const allInsights = await Promise.all(agentPromises);
         return allInsights.flat();
     }
-}
-
-// Singleton instance
-let orchestratorInstance: AgentOrchestrator | null = null;
-
-export function getOrchestrator(): AgentOrchestrator {
-    if (!orchestratorInstance) {
-        orchestratorInstance = new AgentOrchestrator();
-    }
-    return orchestratorInstance;
 }

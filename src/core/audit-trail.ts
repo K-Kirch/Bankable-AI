@@ -183,23 +183,13 @@ export class AuditTrail {
 }
 
 // ============================================
-// SINGLETON MANAGEMENT
+// FACTORY FUNCTION
 // ============================================
 
-let currentAuditTrail: AuditTrail | null = null;
-
+/**
+ * Create a new AuditTrail instance for a specific session.
+ * Each analysis request should create its own audit trail.
+ */
 export function createAuditTrail(sessionId: string): AuditTrail {
-    currentAuditTrail = new AuditTrail(sessionId);
-    return currentAuditTrail;
-}
-
-export function getAuditTrail(): AuditTrail {
-    if (!currentAuditTrail) {
-        throw new Error('Audit trail not initialized. Call createAuditTrail() first.');
-    }
-    return currentAuditTrail;
-}
-
-export function hasAuditTrail(): boolean {
-    return currentAuditTrail !== null;
+    return new AuditTrail(sessionId);
 }
