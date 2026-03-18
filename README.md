@@ -5,7 +5,7 @@
 ## Overview
 
 Bankable.ai uses parallel AI agents to analyze startup financial health and produce:
-- **Bankability Score (0-100)** with letter grades (A-F)
+- **Bankability Score (0-100)** with 13-tier letter grades (A+ through F)
 - **Remediation Roadmap** with prioritized tasks to improve creditworthiness
 
 ### The Agents
@@ -15,12 +15,13 @@ Bankable.ai uses parallel AI agents to analyze startup financial health and prod
 | 🧮 **The Counter** | Financial health, cash flow, revenue concentration |
 | ⚖️ **The Lawyer** | Legal structure, contract terms, compliance |
 | 📈 **The Forecaster** | Stress testing, Monte Carlo simulations |
+| 🌐 **The Market Analyst** | Industry positioning, competitive landscape, growth trajectory |
 
 ## Quick Start
 
 ### Prerequisites
 - Node.js 20+
-- Docker (for Redis, PostgreSQL, ChromaDB)
+- Docker (for Redis, ChromaDB) — PostgreSQL is optional; set `DATABASE_URL` to persist completed analyses
 - API Keys: Google AI (Gemini), Stripe, Plaid
 
 ### Installation
@@ -62,10 +63,15 @@ curl -X POST http://localhost:3000/api/integrations/stripe \
   -H "Content-Type: application/json" \
   -d '{"sessionId": "<session-id>"}'
 
-# Run full analysis
+# Start analysis (returns immediately with a job ID)
 curl -X POST http://localhost:3000/api/analyze \
   -H "Content-Type: application/json" \
   -d '{"companyId": "startup-001"}'
+# → { "jobId": "...", "statusUrl": "/api/analyze/.../status", "status": "queued" }
+
+# Poll for results
+curl http://localhost:3000/api/analyze/<job-id>/status
+# → { "status": "complete", "score": {...}, "roadmap": {...} }
 ```
 
 ## Risk Factors
@@ -81,11 +87,12 @@ curl -X POST http://localhost:3000/api/analyze \
 
 ```
 src/
-├── agents/          # Specialized AI agents
-├── core/            # Orchestrator, context, messaging
+├── agents/          # Specialized AI agents (Counter, Lawyer, Forecaster, Market)
+├── core/            # Orchestrator, context, messaging, job store, DB pool
 ├── ingestion/       # PDF parser, Stripe/Plaid adapters
-├── synthesis/       # Risk calculation, scoring, remediation
+├── synthesis/       # Risk calculation, scoring, contradiction detection, remediation
 ├── api/             # REST endpoints
+├── utils/           # Document extraction helpers
 └── types/           # TypeScript definitions
 ```
 
