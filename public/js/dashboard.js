@@ -26,7 +26,9 @@ function renderDashboard() {
 
   const gradeBadge = document.getElementById('gradeBadge');
   gradeBadge.textContent = grade;
-  gradeBadge.className = `grade-badge grade-${grade}`;
+  // CSS class uses the base letter only (A/B/C/D/F) since + and - are invalid in class names
+  const gradeBase = grade.replace(/[^A-Za-z]/g, '');
+  gradeBadge.className = `grade-badge grade-${gradeBase}`;
 
   document.getElementById('scoreSummary').textContent = result.score.summary;
 
