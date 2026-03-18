@@ -11,6 +11,8 @@ import type {
     RiskFactor,
     RiskComponent,
 } from '../types/index.js';
+import { SCORING } from '../config/index.js';
+import { extractNumericValue, extractLatestNumericValue, getSortedYearKeys } from '../utils/document-extraction.js';
 
 /**
  * Synthesize agent insights into risk factors
@@ -58,11 +60,11 @@ function synthesizeServiceability(insights: AgentInsight[], context: GlobalConte
             const bsData = bsDoc?.data as Record<string, unknown> | undefined;
 
             // Try to get profitability indicators
-            const netIncome = extractLatestValue(plData, 'netIncome') ?? 0;
-            const revenue = extractLatestValue(plData, 'revenue') ?? 1;
-            const totalAssets = extractLatestValue(bsData, 'totalAssets', 'assets') ?? 1;
-            const totalLiabilities = extractLatestValue(bsData, 'totalLiabilities', 'liabilities') ?? 0;
-            const equity = extractLatestValue(bsData, 'totalEquity', 'equity') ?? 0;
+            const netIncome = extractLatestNumericValue(plData, 'netIncome') ?? 0;
+            const revenue = extractLatestNumericValue(plData, 'revenue') ?? 1;
+            const totalAssets = extractLatestNumericValue(bsData, 'totalAssets', 'assets') ?? 1;
+            const totalLiabilities = extractLatestNumericValue(bsData, 'totalLiabilities', 'liabilities') ?? 0;
+            const equity = extractLatestNumericValue(bsData, 'totalEquity', 'equity') ?? 0;
 
             // Profitability ratio (net income / revenue)
             // For manufacturing, 3-5% net margin is typical, 5-10% is good
@@ -136,55 +138,12 @@ function synthesizeServiceability(insights: AgentInsight[], context: GlobalConte
     return {
         name: 'Serviceability',
         score,
-        weight: 0.30,
+        weight: SCORING.weights.serviceability,
         components,
         explanation: generateExplanation('serviceability', score, components, relevantInsights),
     };
 }
 
-/**
- * Extract the latest year's value from document data
- * Handles both flat structure and year-keyed structure
- */
-function extractLatestValue(
-    data: Record<string, unknown> | undefined,
-    ...keys: string[]
-): number | undefined {
-    if (!data) return undefined;
-
-    // Check for year-keyed data (e.g., { "2024": { revenue: 100 }, "2023": { revenue: 90 } })
-    const years = Object.keys(data).filter(k => /^\d{4}$/.test(k)).sort().reverse();
-    if (years.length > 0) {
-        const latestYear = data[years[0]!] as Record<string, unknown>;
-        for (const key of keys) {
-            const value = extractNestedValue(latestYear, key);
-            if (value !== undefined) return value;
-        }
-    }
-
-    // Check flat structure
-    for (const key of keys) {
-        const value = extractNestedValue(data, key);
-        if (value !== undefined) return value;
-    }
-
-    return undefined;
-}
-
-function extractNestedValue(obj: Record<string, unknown>, key: string): number | undefined {
-    if (obj[key] !== undefined && typeof obj[key] === 'number') {
-        return obj[key] as number;
-    }
-    // Check nested objects (e.g., balance_sheet.assets.totalAssets)
-    for (const k of Object.keys(obj)) {
-        const nested = obj[k];
-        if (typeof nested === 'object' && nested !== null) {
-            const value = extractNestedValue(nested as Record<string, unknown>, key);
-            if (value !== undefined) return value;
-        }
-    }
-    return undefined;
-}
 
 function synthesizeConcentration(insights: AgentInsight[], context: GlobalContext): RiskFactor {
     const relevantInsights = insights.filter(i => i.category === 'revenue_quality');
@@ -242,7 +201,7 @@ function synthesizeConcentration(insights: AgentInsight[], context: GlobalContex
     return {
         name: 'Concentration',
         score: Math.max(0, Math.min(100, score)),
-        weight: 0.25,
+        weight: SCORING.weights.concentration,
         components,
         explanation: generateExplanation('concentration', score, components, relevantInsights),
     };
@@ -285,11 +244,11 @@ function synthesizeRetention(insights: AgentInsight[], context: GlobalContext): 
         const plDoc = context.documents.find(d => d.type === 'profit_and_loss');
         if (plDoc?.data) {
             const data = plDoc.data as Record<string, unknown>;
-            const years = Object.keys(data).filter(k => /^\d{4}$/.test(k)).sort().reverse();
+            const years = getSortedYearKeys(data);
 
             if (years.length >= 2) {
-                const latest = extractNestedValue(data[years[0]!] as Record<string, unknown>, 'revenue') ?? 0;
-                const prior = extractNestedValue(data[years[1]!] as Record<string, unknown>, 'revenue') ?? 0;
+                const latest = extractNumericValue(data[years[0]!] as Record<string, unknown>, 'revenue') ?? 0;
+                const prior = extractNumericValue(data[years[1]!] as Record<string, unknown>, 'revenue') ?? 0;
 
                 if (prior > 0) {
                     const growth = (latest - prior) / prior;
@@ -323,7 +282,7 @@ function synthesizeRetention(insights: AgentInsight[], context: GlobalContext): 
     return {
         name: 'Retention',
         score: Math.max(0, Math.min(100, score)),
-        weight: 0.25,
+        weight: SCORING.weights.retention,
         components,
         explanation: generateExplanation('retention', score, components, relevantInsights),
     };
@@ -376,7 +335,7 @@ function synthesizeCompliance(insights: AgentInsight[], context: GlobalContext):
     return {
         name: 'Compliance',
         score: Math.max(0, Math.min(100, score)),
-        weight: 0.20,
+        weight: SCORING.weights.compliance,
         components,
         explanation: generateExplanation('compliance', score, components, relevantInsights),
     };
@@ -405,11 +364,11 @@ function synthesizeGrowth(insights: AgentInsight[], context: GlobalContext): Ris
     const plDoc = context.documents.find(d => d.type === 'profit_and_loss');
     if (plDoc?.data) {
         const data = plDoc.data as Record<string, unknown>;
-        const years = Object.keys(data).filter(k => /^\d{4}$/.test(k)).sort().reverse();
+        const years = getSortedYearKeys(data);
 
         if (years.length >= 2) {
-            const latest = extractNestedValue(data[years[0]!] as Record<string, unknown>, 'revenue') ?? 0;
-            const prior = extractNestedValue(data[years[1]!] as Record<string, unknown>, 'revenue') ?? 0;
+            const latest = extractNumericValue(data[years[0]!] as Record<string, unknown>, 'revenue') ?? 0;
+            const prior = extractNumericValue(data[years[1]!] as Record<string, unknown>, 'revenue') ?? 0;
 
             if (prior > 0) {
                 const yoyGrowth = (latest - prior) / prior;
@@ -455,7 +414,7 @@ function synthesizeGrowth(insights: AgentInsight[], context: GlobalContext): Ris
     return {
         name: 'Growth',
         score: Math.max(0, Math.min(100, score)),
-        weight: 0.20,
+        weight: SCORING.weights.growth,
         components,
         explanation: generateExplanation('growth', score, components, relevantInsights),
     };

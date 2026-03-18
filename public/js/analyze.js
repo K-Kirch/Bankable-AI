@@ -1,97 +1,156 @@
 /**
  * Analyze Page JavaScript
- * Handles analysis polling and agent status updates
+ * Drives the analysis polling loop against the async 202+poll API.
+ *
+ * Flow:
+ *   POST /api/analyze → { jobId, statusUrl } (202)
+ *   GET  /api/analyze/:jobId/status (every 2s, up to 60 polls / ~2 min)
+ *   → status: queued | analyzing → keep polling
+ *   → status: complete           → store result, redirect to dashboard
+ *   → status: error              → fall back to demo data
  */
 
-const statusMessage = document.getElementById('statusMessage');
-const statusCounter = document.getElementById('status-counter');
-const statusLawyer = document.getElementById('status-lawyer');
+const statusMessage   = document.getElementById('statusMessage');
+const statusCounter   = document.getElementById('status-counter');
+const statusLawyer    = document.getElementById('status-lawyer');
 const statusForecaster = document.getElementById('status-forecaster');
+
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLLS        = 60; // 2-minute timeout
 
 // Get session from localStorage
 const session = JSON.parse(localStorage.getItem('bankable_session') || '{}');
 
 if (!session.sessionId) {
-    // No session, redirect back
     window.location.href = '/upload.html';
 } else {
     startAnalysis();
 }
 
 async function startAnalysis() {
+    // Kick off the analysis job
+    let jobId;
+    let statusUrl;
+
     try {
-        // Start the analysis
-        const analyzeRes = await fetch('/api/analyze', {
+        const res = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ companyId: session.companyId || 'demo-company' })
         });
 
-        // Simulate agent progress while waiting
-        simulateAgentProgress();
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const result = await analyzeRes.json();
+        const data = await res.json();
+        jobId     = data.jobId;
+        statusUrl = data.statusUrl;
 
-        if (result.success) {
-            // Store results
-            localStorage.setItem('bankable_result', JSON.stringify(result));
+        localStorage.setItem('bankable_job', JSON.stringify({ jobId, statusUrl }));
+    } catch (err) {
+        console.error('Failed to start analysis:', err);
+        fallbackToDemo();
+        return;
+    }
 
-            // Mark all agents complete
-            statusCounter.classList.remove('active');
-            statusCounter.classList.add('complete');
-            statusLawyer.classList.remove('active');
-            statusLawyer.classList.add('complete');
-            statusForecaster.classList.remove('active');
-            statusForecaster.classList.add('complete');
+    // Begin polling
+    setAgentStage('queued');
+    pollForResult(statusUrl);
+}
 
-            statusMessage.textContent = 'Analysis complete! Redirecting...';
+async function pollForResult(statusUrl) {
+    let polls = 0;
 
-            // Redirect to dashboard
-            setTimeout(() => {
-                window.location.href = '/dashboard.html';
-            }, 1500);
-        } else {
-            throw new Error(result.error || 'Analysis failed');
+    const interval = setInterval(async () => {
+        polls++;
+
+        if (polls > MAX_POLLS) {
+            clearInterval(interval);
+            console.error('Analysis timed out after 2 minutes');
+            fallbackToDemo();
+            return;
         }
-    } catch (error) {
-        console.error('Analysis error:', error);
-        statusMessage.textContent = 'Analysis encountered an error. Using demo data...';
 
-        // Use demo data for testing
-        setTimeout(() => {
-            localStorage.setItem('bankable_result', JSON.stringify(getDemoResult()));
-            window.location.href = '/dashboard.html';
-        }, 2000);
+        try {
+            const res = await fetch(statusUrl);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            switch (data.status) {
+                case 'queued':
+                    setAgentStage('queued');
+                    break;
+
+                case 'analyzing':
+                    setAgentStage('analyzing', polls);
+                    break;
+
+                case 'complete':
+                    clearInterval(interval);
+                    setAgentStage('complete');
+                    localStorage.setItem('bankable_result', JSON.stringify(data));
+                    statusMessage.textContent = 'Analysis complete! Redirecting...';
+                    setTimeout(() => { window.location.href = '/dashboard.html'; }, 1500);
+                    break;
+
+                case 'error':
+                    clearInterval(interval);
+                    console.error('Analysis error:', data.error);
+                    fallbackToDemo();
+                    break;
+            }
+        } catch (err) {
+            console.error('Poll error:', err);
+            // Transient network error — keep polling
+        }
+    }, POLL_INTERVAL_MS);
+}
+
+/**
+ * Drive agent status indicators from real API status.
+ * 'analyzing' uses poll count to stagger the visual reveal of each agent.
+ */
+function setAgentStage(stage, pollCount = 0) {
+    if (stage === 'queued') {
+        statusMessage.textContent = 'Queued for analysis...';
+        return;
+    }
+
+    if (stage === 'analyzing') {
+        statusMessage.textContent = 'Running analysis...';
+
+        // Stagger agent indicators: counter → lawyer → forecaster
+        if (pollCount >= 1) activate(statusCounter);
+        if (pollCount >= 4) activate(statusLawyer);
+        if (pollCount >= 7) activate(statusForecaster);
+        return;
+    }
+
+    if (stage === 'complete') {
+        complete(statusCounter);
+        complete(statusLawyer);
+        complete(statusForecaster);
     }
 }
 
-function simulateAgentProgress() {
-    // Stage 1: Counter starts
-    statusCounter.classList.add('active');
+function activate(el) {
+    if (el && !el.classList.contains('active') && !el.classList.contains('complete')) {
+        el.classList.add('active');
+    }
+}
 
-    // Stage 2: Lawyer starts
+function complete(el) {
+    if (el) {
+        el.classList.remove('active');
+        el.classList.add('complete');
+    }
+}
+
+function fallbackToDemo() {
+    statusMessage.textContent = 'Analysis encountered an error. Using demo data...';
     setTimeout(() => {
-        statusLawyer.classList.add('active');
+        localStorage.setItem('bankable_result', JSON.stringify(getDemoResult()));
+        window.location.href = '/dashboard.html';
     }, 2000);
-
-    // Stage 3: Forecaster starts
-    setTimeout(() => {
-        statusForecaster.classList.add('active');
-    }, 4000);
-
-    // Stage 4: Counter completes
-    setTimeout(() => {
-        statusCounter.classList.remove('active');
-        statusCounter.classList.add('complete');
-        statusMessage.textContent = 'Financial analysis complete...';
-    }, 6000);
-
-    // Stage 5: Lawyer completes
-    setTimeout(() => {
-        statusLawyer.classList.remove('active');
-        statusLawyer.classList.add('complete');
-        statusMessage.textContent = 'Legal analysis complete...';
-    }, 8000);
 }
 
 function getDemoResult() {
@@ -102,10 +161,11 @@ function getDemoResult() {
             grade: 'B',
             summary: 'Good overall bankability with room for improvement in customer concentration and contract terms.',
             breakdown: {
-                serviceability: { score: 78, weight: 0.30 },
-                concentration: { score: 62, weight: 0.25 },
-                retention: { score: 68, weight: 0.25 },
-                compliance: { score: 85, weight: 0.20 }
+                serviceability: { score: 78, weight: 0.25 },
+                concentration:  { score: 62, weight: 0.20 },
+                retention:      { score: 68, weight: 0.20 },
+                compliance:     { score: 85, weight: 0.15 },
+                growth:         { score: 70, weight: 0.20 },
             }
         },
         roadmap: {

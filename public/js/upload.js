@@ -88,10 +88,12 @@ uploadForm.addEventListener('submit', async (e) => {
 
         const sessionData = await sessionRes.json();
         const sessionId = sessionData.sessionId;
+        const companyId = companyName.toLowerCase().replace(/\s+/g, '-');
 
         // Store session info
         localStorage.setItem('bankable_session', JSON.stringify({
             sessionId,
+            companyId,
             companyName,
             startedAt: new Date().toISOString()
         }));

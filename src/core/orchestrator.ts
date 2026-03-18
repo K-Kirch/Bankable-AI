@@ -16,6 +16,11 @@ import type {
 import { GlobalContextService, createGlobalContext } from './global-context.js';
 import { MessageBus } from './message-bus.js';
 import { AuditTrail, createAuditTrail } from './audit-trail.js';
+import { checkObviousCases } from '../synthesis/obvious-cases.js';
+import { detectContradictions } from '../synthesis/contradiction-detector.js';
+import { synthesizeRiskFactors } from '../synthesis/risk-synthesizer.js';
+import { calculateBankabilityScore } from '../synthesis/score-calculator.js';
+import { generateRemediationRoadmap } from '../synthesis/remediation.js';
 
 // ============================================
 // AGENT INTERFACE
@@ -84,6 +89,7 @@ export class AgentOrchestrator {
     async analyze(companyId: string): Promise<{
         score: BankabilityScore;
         roadmap: RemediationRoadmap;
+        failedAgents: AgentId[];
     }> {
         // Check if we already have a context with documents (from fixture injection)
         let context: GlobalContext;
@@ -119,7 +125,11 @@ export class AgentOrchestrator {
             this.state.status = 'complete';
             this.state.endTime = new Date();
 
-            return result;
+            const failedAgents = Array.from(this.state.agentStatuses.entries())
+                .filter(([, status]) => status === 'error')
+                .map(([id]) => id);
+
+            return { ...result, failedAgents };
         } catch (error) {
             this.state.status = 'error';
             this.state.errors.push(error as Error);
@@ -150,7 +160,6 @@ export class AgentOrchestrator {
         roadmap: RemediationRoadmap;
     }> {
         // Step 0: Check for obvious cases FIRST (before LLM analysis)
-        const { checkObviousCases } = await import('../synthesis/obvious-cases.js');
         const obviousResult = checkObviousCases(context);
 
         if (obviousResult) {
@@ -165,18 +174,18 @@ export class AgentOrchestrator {
         this.state!.status = 'analyzing';
         const insights = await this.runAgentsParallel(context);
 
-        // Step 2: Synthesize risk factors
+        // Step 2: Detect contradictions across data sources
+        await detectContradictions(context, this.contextService);
+
+        // Step 3: Synthesize risk factors
         this.state!.status = 'synthesizing';
-        const { synthesizeRiskFactors } = await import('../synthesis/risk-synthesizer.js');
         const riskFactors = await synthesizeRiskFactors(insights, context);
         await this.contextService.setRiskFactors(riskFactors);
 
-        // Step 3: Calculate score
-        const { calculateBankabilityScore } = await import('../synthesis/score-calculator.js');
+        // Step 4: Calculate score
         const score = calculateBankabilityScore(riskFactors, context);
 
-        // Step 4: Generate roadmap
-        const { generateRemediationRoadmap } = await import('../synthesis/remediation.js');
+        // Step 5: Generate roadmap
         const roadmap = await generateRemediationRoadmap(score, riskFactors, context);
 
         return { score, roadmap };

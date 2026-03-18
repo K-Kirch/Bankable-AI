@@ -6,8 +6,11 @@
 
 import express, { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
+import { v4 as uuid } from 'uuid';
 import { AgentOrchestrator } from '../core/orchestrator.js';
 import { createGlobalContext } from '../core/global-context.js';
+import { createJob, getJob, updateJob } from '../core/job-store.js';
+import { fetchAnalysis } from '../core/analysis-store.js';
 import { CounterAgent } from '../agents/counter-agent.js';
 import { LawyerAgent } from '../agents/lawyer-agent.js';
 import { ForecasterAgent } from '../agents/forecaster-agent.js';
@@ -45,35 +48,50 @@ function createOrchestrator(contextService?: ReturnType<typeof createGlobalConte
 
 /**
  * POST /api/analyze
- * Start a full analysis for a company
+ * Enqueue an analysis job and return immediately.
+ * Poll GET /api/analyze/:sessionId/status for progress and results.
  */
-router.post('/analyze', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { companyId } = req.body;
+router.post('/analyze', (req: Request, res: Response) => {
+    const { companyId } = req.body;
 
-        if (!companyId) {
-            res.status(400).json({ error: 'companyId is required' });
-            return;
-        }
-
-        // Create fresh orchestrator per request (no shared state)
-        const orchestrator = createOrchestrator();
-        const result = await orchestrator.analyze(companyId);
-
-        res.json({
-            success: true,
-            score: result.score,
-            roadmap: result.roadmap,
-            // Enhanced breakdown for actionable dashboard
-            breakdown: {
-                riskFactors: result.score.riskFactors,
-                explanation: result.score.explanation,
-                penalties: result.score.penalties,
-            }
-        });
-    } catch (error) {
-        next(error);
+    if (!companyId) {
+        res.status(400).json({ error: 'companyId is required' });
+        return;
     }
+
+    const jobId = uuid();
+    createJob(jobId, companyId);
+
+    // Defer analysis off the request cycle — critical gap fix: top-level catch marks job as error
+    setImmediate(() => {
+        const orchestrator = createOrchestrator();
+        updateJob(jobId, { status: 'analyzing' });
+
+        orchestrator.analyze(companyId)
+            .then(result => {
+                updateJob(jobId, {
+                    status: 'complete',
+                    completedAt: new Date(),
+                    score: result.score,
+                    roadmap: result.roadmap,
+                    failedAgents: result.failedAgents,
+                });
+            })
+            .catch((err: Error) => {
+                updateJob(jobId, {
+                    status: 'error',
+                    completedAt: new Date(),
+                    errorMessage: err.message,
+                });
+            });
+    });
+
+    res.status(202).json({
+        success: true,
+        jobId,
+        status: 'queued',
+        statusUrl: `/api/analyze/${jobId}/status`,
+    });
 });
 
 /**
@@ -146,17 +164,69 @@ router.post('/test/analyze-fixture', async (req: Request, res: Response, next: N
 
 /**
  * GET /api/analyze/:sessionId/status
- * Get the status of an ongoing analysis
- * 
- * NOTE: With per-request orchestrators, status tracking requires
- * external storage (Redis/DB). For now, this returns a simplified status.
+ * Poll the status of an async analysis job.
+ * Returns score + roadmap once status is 'complete'.
  */
-router.get('/analyze/:sessionId/status', async (_req: Request, res: Response) => {
-    // TODO: Implement persistent status tracking via database
-    res.status(501).json({
-        error: 'Status tracking requires persistent storage (planned for Phase 3)',
-        message: 'Analysis is synchronous — the result is returned directly from POST /api/analyze',
-    });
+router.get('/analyze/:sessionId/status', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const jobId = req.params.sessionId as string;
+        const inMemory = getJob(jobId);
+
+        if (inMemory) {
+            switch (inMemory.status) {
+                case 'complete':
+                    res.json({
+                        jobId: inMemory.id,
+                        status: inMemory.status,
+                        completedAt: inMemory.completedAt,
+                        score: inMemory.score,
+                        roadmap: inMemory.roadmap,
+                        failedAgents: inMemory.failedAgents,
+                    });
+                    return;
+                case 'error':
+                    res.status(500).json({
+                        jobId: inMemory.id,
+                        status: inMemory.status,
+                        completedAt: inMemory.completedAt,
+                        error: inMemory.errorMessage,
+                    });
+                    return;
+                case 'queued':
+                case 'analyzing':
+                    res.json({ jobId: inMemory.id, status: inMemory.status, createdAt: inMemory.createdAt });
+                    return;
+            }
+        }
+
+        // Not in memory — check DB (covers evicted jobs and post-restart lookups)
+        const persisted = await fetchAnalysis(jobId);
+
+        if (!persisted) {
+            res.status(404).json({ error: 'Job not found' });
+            return;
+        }
+
+        if (persisted.status === 'complete') {
+            res.json({
+                jobId: persisted.id,
+                status: persisted.status,
+                completedAt: persisted.completedAt,
+                score: persisted.score,
+                roadmap: persisted.roadmap,
+                failedAgents: persisted.failedAgents,
+            });
+        } else {
+            res.status(500).json({
+                jobId: persisted.id,
+                status: persisted.status,
+                completedAt: persisted.completedAt,
+                error: persisted.errorMessage,
+            });
+        }
+    } catch (err) {
+        next(err);
+    }
 });
 
 // ============================================

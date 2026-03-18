@@ -239,12 +239,14 @@ export interface ContradictionResolution {
 // SCORE & REMEDIATION TYPES
 // ============================================
 
+export type Grade = 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'D+' | 'D' | 'D-' | 'F';
+
 export interface BankabilityScore {
     /** Final score 0-100 */
     score: number;
 
     /** Letter grade */
-    grade: 'A' | 'B' | 'C' | 'D' | 'F';
+    grade: Grade;
 
     /** Risk breakdown */
     riskFactors: RiskFactorMap;

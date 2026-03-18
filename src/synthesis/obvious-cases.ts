@@ -7,11 +7,13 @@
 
 import type {
     GlobalContext,
+    Grade,
     BankabilityScore,
     RiskFactorMap,
     RemediationRoadmap,
     RiskFactor,
 } from '../types/index.js';
+import { extractNumericValue, extractLatestNumericValue, getSortedYearKeys } from '../utils/document-extraction.js';
 
 // ============================================
 // OBVIOUS CASE TYPES
@@ -129,7 +131,7 @@ function isAllNegativeCase(context: GlobalContext): boolean {
     const data = plDoc.data as Record<string, unknown>;
 
     // Check for year-keyed data
-    const years = Object.keys(data).filter(k => /^\d{4}$/.test(k));
+    const years = getSortedYearKeys(data);
     if (years.length > 0) {
         const allNegative = years.every(year => {
             const yearData = data[year] as Record<string, unknown>;
@@ -179,39 +181,6 @@ function isZeroRevenueCase(context: GlobalContext): boolean {
 }
 
 // ============================================
-// VALUE EXTRACTION HELPERS
-// ============================================
-
-function extractNumericValue(obj: Record<string, unknown>, ...keys: string[]): number | undefined {
-    for (const key of keys) {
-        if (obj[key] !== undefined && typeof obj[key] === 'number') {
-            return obj[key] as number;
-        }
-        // Check nested objects
-        for (const k of Object.keys(obj)) {
-            const nested = obj[k];
-            if (typeof nested === 'object' && nested !== null && !Array.isArray(nested)) {
-                const value = extractNumericValue(nested as Record<string, unknown>, key);
-                if (value !== undefined) return value;
-            }
-        }
-    }
-    return undefined;
-}
-
-function extractLatestNumericValue(data: Record<string, unknown>, ...keys: string[]): number | undefined {
-    // Check for year-keyed data first
-    const years = Object.keys(data).filter(k => /^\d{4}$/.test(k)).sort().reverse();
-    if (years.length > 0) {
-        const latestYear = data[years[0]!] as Record<string, unknown>;
-        return extractNumericValue(latestYear, ...keys);
-    }
-
-    // Flat structure
-    return extractNumericValue(data, ...keys);
-}
-
-// ============================================
 // RESULT BUILDERS
 // ============================================
 
@@ -228,7 +197,7 @@ interface ObviousResultOptions {
 function createObviousResult(
     caseType: ObviousCaseType,
     score: number,
-    grade: 'A' | 'B' | 'C' | 'D' | 'F',
+    grade: Grade,
     context: GlobalContext,
     options: ObviousResultOptions
 ): ObviousCaseResult {

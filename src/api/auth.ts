@@ -11,6 +11,7 @@
  * If BANKABLE_API_KEY is not set, authentication is skipped (dev mode).
  */
 
+import { timingSafeEqual } from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 
 export function apiKeyAuth(req: Request, res: Response, next: NextFunction): void {
@@ -43,7 +44,9 @@ export function apiKeyAuth(req: Request, res: Response, next: NextFunction): voi
     }
 
     // Constant-time comparison to prevent timing attacks
-    if (providedKey.length !== expectedKey.length || !timingSafeEqual(providedKey, expectedKey)) {
+    const a = Buffer.from(providedKey);
+    const b = Buffer.from(expectedKey);
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
         res.status(403).json({
             error: 'Invalid API key',
         });
@@ -53,12 +56,3 @@ export function apiKeyAuth(req: Request, res: Response, next: NextFunction): voi
     next();
 }
 
-/** Simple constant-time string comparison */
-function timingSafeEqual(a: string, b: string): boolean {
-    if (a.length !== b.length) return false;
-    let result = 0;
-    for (let i = 0; i < a.length; i++) {
-        result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-    }
-    return result === 0;
-}

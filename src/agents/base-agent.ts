@@ -12,7 +12,6 @@ import type {
     AgentInsight,
     GlobalContext,
     InsightCategory,
-    Evidence,
 } from '../types/index.js';
 import type { MessageBus, Message } from '../core/message-bus.js';
 import type { AuditTrail } from '../core/audit-trail.js';
@@ -369,35 +368,4 @@ IMPORTANT: Keep impact scores moderate (-40 to +40 range). Only use extreme scor
         console.log(`[${this.id}] Received message from ${message.from}: ${message.type}`);
     }
 
-    // ============================================
-    // LEGACY METHODS (kept for backward compatibility)
-    // ============================================
-
-    protected createInsight(params: {
-        category: InsightCategory;
-        title: string;
-        description: string;
-        confidence: number;
-        impact: number;
-        evidence: Evidence[];
-        reasoningChain: string;
-        auditEntryId?: string;
-    }): AgentInsight {
-        return {
-            id: uuid(),
-            agentId: this.id,
-            timestamp: new Date(),
-            ...params,
-        };
-    }
-
-    protected createEvidence(params: {
-        source: 'document' | 'api' | 'derived';
-        documentId?: string;
-        field?: string;
-        value: unknown;
-        confidence: number;
-    }): Evidence {
-        return params;
-    }
 }

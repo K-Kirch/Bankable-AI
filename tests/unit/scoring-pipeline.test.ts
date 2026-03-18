@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { synthesizeRiskFactors } from '../../src/synthesis/risk-synthesizer.js';
 import { calculateBankabilityScore } from '../../src/synthesis/score-calculator.js';
 import { checkObviousCases } from '../../src/synthesis/obvious-cases.js';
+import { SCORING } from '../../src/config/index.js';
 import type { AgentInsight, GlobalContext, RiskFactorMap } from '../../src/types/index.js';
 
 // ============================================
@@ -43,6 +44,45 @@ function createInsight(overrides: Partial<AgentInsight> = {}): AgentInsight {
         ...overrides,
     };
 }
+
+// ============================================
+// SCORING CONFIG INVARIANTS
+// ============================================
+
+describe('SCORING.weights', () => {
+    it('sums to exactly 1.0', () => {
+        const sum = Object.values(SCORING.weights).reduce((a, b) => a + b, 0);
+        expect(sum).toBeCloseTo(1.0, 10);
+    });
+
+    it('synthesized RiskFactor weights match SCORING.weights', async () => {
+        const context = createMinimalContext({
+            documents: [{
+                id: 'pl-1',
+                type: 'profit_and_loss',
+                filename: 'pl.json',
+                parsedAt: new Date(),
+                confidence: 1.0,
+                data: { '2024': { revenue: 1000000, netIncome: 50000 } },
+                rawText: '',
+                trustScore: 0.9,
+            }],
+        });
+        const factors = await synthesizeRiskFactors([], context);
+        expect(factors.serviceability.weight).toBe(SCORING.weights.serviceability);
+        expect(factors.concentration.weight).toBe(SCORING.weights.concentration);
+        expect(factors.retention.weight).toBe(SCORING.weights.retention);
+        expect(factors.compliance.weight).toBe(SCORING.weights.compliance);
+        expect(factors.growth.weight).toBe(SCORING.weights.growth);
+    });
+
+    it('synthesized weights sum to 1.0', async () => {
+        const context = createMinimalContext();
+        const factors = await synthesizeRiskFactors([], context);
+        const sum = Object.values(factors).reduce((a, f) => a + f.weight, 0);
+        expect(sum).toBeCloseTo(1.0, 10);
+    });
+});
 
 // ============================================
 // RISK SYNTHESIZER TESTS
@@ -228,26 +268,29 @@ describe('calculateBankabilityScore', () => {
         expect(result.score).toBe(75);
     });
 
-    it('assigns correct grades', () => {
+    it('assigns correct grades across 13-tier scale', () => {
         const context = createMinimalContext();
 
-        const gradeA = calculateBankabilityScore(
-            createRiskFactors({ serviceability: 90, concentration: 85, retention: 80, compliance: 85, growth: 90 }),
+        // Helper: uniform score across all 5 factors → same final score
+        const scoreOf = (n: number) => calculateBankabilityScore(
+            createRiskFactors({ serviceability: n, concentration: n, retention: n, compliance: n, growth: n }),
             context,
         );
-        expect(gradeA.grade).toBe('A');
 
-        const gradeC = calculateBankabilityScore(
-            createRiskFactors({ serviceability: 55, concentration: 55, retention: 55, compliance: 55, growth: 55 }),
-            context,
-        );
-        expect(gradeC.grade).toBe('C');
-
-        const gradeF = calculateBankabilityScore(
-            createRiskFactors({ serviceability: 20, concentration: 20, retention: 20, compliance: 20, growth: 20 }),
-            context,
-        );
-        expect(gradeF.grade).toBe('F');
+        // Verify final numeric scores hit expected thresholds
+        expect(scoreOf(96).grade).toBe('A+');  // ≥ 95
+        expect(scoreOf(91).grade).toBe('A');   // ≥ 90
+        expect(scoreOf(86).grade).toBe('A-');  // ≥ 85
+        expect(scoreOf(81).grade).toBe('B+');  // ≥ 80
+        expect(scoreOf(76).grade).toBe('B');   // ≥ 75
+        expect(scoreOf(71).grade).toBe('B-');  // ≥ 70
+        expect(scoreOf(66).grade).toBe('C+');  // ≥ 65
+        expect(scoreOf(61).grade).toBe('C');   // ≥ 60
+        expect(scoreOf(56).grade).toBe('C-');  // ≥ 55
+        expect(scoreOf(51).grade).toBe('D+');  // ≥ 50
+        expect(scoreOf(46).grade).toBe('D');   // ≥ 45
+        expect(scoreOf(41).grade).toBe('D-');  // ≥ 40
+        expect(scoreOf(20).grade).toBe('F');   // < 40
     });
 
     it('applies compliance penalty when < 40', () => {
