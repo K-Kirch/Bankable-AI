@@ -10,10 +10,11 @@
  *   → status: error              → fall back to demo data
  */
 
-const statusMessage   = document.getElementById('statusMessage');
-const statusCounter   = document.getElementById('status-counter');
-const statusLawyer    = document.getElementById('status-lawyer');
+const statusMessage    = document.getElementById('statusMessage');
+const statusCounter    = document.getElementById('status-counter');
+const statusLawyer     = document.getElementById('status-lawyer');
 const statusForecaster = document.getElementById('status-forecaster');
+const statusMarket     = document.getElementById('status-market');
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLLS        = 60; // 2-minute timeout
@@ -118,10 +119,11 @@ function setAgentStage(stage, pollCount = 0) {
     if (stage === 'analyzing') {
         statusMessage.textContent = 'Running analysis...';
 
-        // Stagger agent indicators: counter → lawyer → forecaster
+        // Stagger agent indicators: counter → lawyer → forecaster → market
         if (pollCount >= 1) activate(statusCounter);
         if (pollCount >= 4) activate(statusLawyer);
         if (pollCount >= 7) activate(statusForecaster);
+        if (pollCount >= 10) activate(statusMarket);
         return;
     }
 
@@ -129,6 +131,7 @@ function setAgentStage(stage, pollCount = 0) {
         complete(statusCounter);
         complete(statusLawyer);
         complete(statusForecaster);
+        complete(statusMarket);
     }
 }
 
