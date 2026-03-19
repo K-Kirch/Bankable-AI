@@ -49,13 +49,29 @@ function renderFileList() {
         return;
     }
 
-    fileList.innerHTML = uploadedFiles.map((file, index) => `
-    <div class="file-item">
-      <span class="file-item-icon">📄</span>
-      <span class="file-item-name">${file.name}</span>
-      <span class="file-item-remove" onclick="removeFile(${index})">✕</span>
-    </div>
-  `).join('');
+    fileList.innerHTML = '';
+    uploadedFiles.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'file-item';
+
+        const icon = document.createElement('span');
+        icon.className = 'file-item-icon';
+        icon.textContent = '📄';
+
+        const name = document.createElement('span');
+        name.className = 'file-item-name';
+        name.textContent = file.name; // textContent prevents XSS from crafted filenames
+
+        const remove = document.createElement('span');
+        remove.className = 'file-item-remove';
+        remove.textContent = '✕';
+        remove.onclick = () => removeFile(index);
+
+        item.appendChild(icon);
+        item.appendChild(name);
+        item.appendChild(remove);
+        fileList.appendChild(item);
+    });
 }
 
 function removeFile(index) {

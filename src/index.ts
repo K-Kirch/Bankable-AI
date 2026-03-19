@@ -8,6 +8,7 @@
 import 'dotenv/config';
 
 import express from 'express';
+import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { apiRouter } from './api/routes.js';
@@ -17,6 +18,12 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Trust the first proxy hop (required for correct req.ip in rate limiting behind load balancers)
+app.set('trust proxy', 1);
+
+// Security headers
+app.use(helmet());
 
 // Middleware
 app.use(express.json());

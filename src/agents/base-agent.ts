@@ -246,7 +246,15 @@ IMPORTANT: Keep impact scores moderate (-40 to +40 range). Only use extreme scor
                     .replace(/^```\s*/i, '')
                     .replace(/\s*```$/i, '');
 
-                parsed = JSON.parse(cleaned) as T;
+                const raw = JSON.parse(cleaned);
+
+                // Validate LLM output shape before accepting it into the scoring pipeline
+                const validation = safeParseLLMResponse(LLMAnalysisResponseSchema, raw, `${this.id} ${analysisType}`);
+                if (!validation.success) {
+                    throw new Error(`LLM response failed schema validation: ${validation.error}`);
+                }
+
+                parsed = validation.data as unknown as T;
                 break;
             } catch (error) {
                 retryCount++;

@@ -22,7 +22,17 @@ import { apiKeyAuth } from './auth.js';
 import { rateLimiter } from './rate-limit.js';
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
+    fileFilter: (_req, file, cb) => {
+        if (file.mimetype === 'application/pdf') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only PDF files are accepted'));
+        }
+    },
+});
 
 // Apply rate limiting first, then authentication
 router.use(rateLimiter);

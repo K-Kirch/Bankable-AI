@@ -11,8 +11,13 @@
  * If BANKABLE_API_KEY is not set, authentication is skipped (dev mode).
  */
 
-import { timingSafeEqual } from 'crypto';
+import { timingSafeEqual, createHmac } from 'crypto';
 import { Request, Response, NextFunction } from 'express';
+
+/** Hash a value with HMAC-SHA256 so timingSafeEqual always compares equal-length buffers. */
+function hashKey(key: string): Buffer {
+    return createHmac('sha256', 'bankable-key-comparison').update(key).digest();
+}
 
 export function apiKeyAuth(req: Request, res: Response, next: NextFunction): void {
     const expectedKey = process.env.BANKABLE_API_KEY;
@@ -43,10 +48,11 @@ export function apiKeyAuth(req: Request, res: Response, next: NextFunction): voi
         return;
     }
 
-    // Constant-time comparison to prevent timing attacks
-    const a = Buffer.from(providedKey);
-    const b = Buffer.from(expectedKey);
-    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    // Hash both keys before comparing so timingSafeEqual always sees equal-length
+    // buffers, eliminating the key-length side-channel from an early length check.
+    const a = hashKey(providedKey);
+    const b = hashKey(expectedKey);
+    if (!timingSafeEqual(a, b)) {
         res.status(403).json({
             error: 'Invalid API key',
         });

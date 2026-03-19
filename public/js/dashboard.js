@@ -7,6 +7,16 @@
 const session = JSON.parse(localStorage.getItem('bankable_session') || '{}');
 const result = JSON.parse(localStorage.getItem('bankable_result') || '{}');
 
+/** Escape HTML special chars to prevent XSS from LLM-generated strings in innerHTML. */
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 if (!result.score) {
   // No results, redirect back
   window.location.href = '/upload.html';
@@ -66,7 +76,7 @@ function renderCriticalIssues(explanation) {
 
   section.style.display = 'block';
   list.innerHTML = explanation.criticalIssues
-    .map(issue => `<li>${issue}</li>`)
+    .map(issue => `<li>${escapeHtml(issue)}</li>`)
     .join('');
 }
 
@@ -89,7 +99,7 @@ function renderExecutiveSummary(explanation) {
             ${strengths.length > 0
       ? strengths.map(s => `
                     <div class="insight-card strength">
-                        <span class="insight-text">${s}</span>
+                        <span class="insight-text">${escapeHtml(s)}</span>
                     </div>
                 `).join('')
       : '<p class="no-items">No significant strengths identified</p>'
@@ -102,7 +112,7 @@ function renderExecutiveSummary(explanation) {
             ${weaknesses.length > 0
       ? weaknesses.map(w => `
                     <div class="insight-card concern">
-                        <span class="insight-text">${w}</span>
+                        <span class="insight-text">${escapeHtml(w)}</span>
                     </div>
                 `).join('')
       : '<p class="no-items">No significant concerns identified</p>'
@@ -178,7 +188,7 @@ function renderRiskFactors(breakdown) {
                 <div class="risk-bar-fill ${level}" style="width: ${score}%"></div>
             </div>
             <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
-                ${data.explanation || factor.description}
+                ${escapeHtml(data.explanation || factor.description)}
             </p>
             ${hasComponents ? `
                 <div class="risk-components" style="display: none;">
@@ -186,13 +196,13 @@ function renderRiskFactors(breakdown) {
                     ${components.map(c => `
                         <div class="risk-component">
                             <div class="risk-component-header">
-                                <span class="risk-component-name">${c.name}</span>
+                                <span class="risk-component-name">${escapeHtml(c.name)}</span>
                                 <span class="risk-component-value">${Math.round(c.value)}/100</span>
                             </div>
                             <div class="risk-component-bar">
                                 <div class="risk-component-bar-fill" style="width: ${c.value}%"></div>
                             </div>
-                            <p class="risk-component-interpretation">${c.interpretation}</p>
+                            <p class="risk-component-interpretation">${escapeHtml(c.interpretation)}</p>
                         </div>
                     `).join('')}
                 </div>
@@ -242,10 +252,10 @@ function renderTasks(tasks) {
             <div class="task-priority" style="background: ${color}"></div>
             <div class="task-content">
                 <div class="task-header">
-                    <div class="task-title">${task.title}</div>
-                    <span class="task-category ${task.category}">${formatCategory(task.category)}</span>
+                    <div class="task-title">${escapeHtml(task.title)}</div>
+                    <span class="task-category ${escapeHtml(task.category)}">${escapeHtml(formatCategory(task.category))}</span>
                 </div>
-                <div class="task-description">${task.description}</div>
+                <div class="task-description">${escapeHtml(task.description)}</div>
                 <div class="task-meta">
                     <span class="task-impact">+${task.expectedScoreGain} pts</span>
                     <span>📅 ${task.estimatedDays} days</span>
@@ -255,7 +265,7 @@ function renderTasks(tasks) {
                     <div class="task-actions" style="display: none;">
                         <div class="action-items-header">Action Items:</div>
                         <ul class="action-items-list">
-                            ${task.actionItems.map(item => `<li>${item}</li>`).join('')}
+                            ${task.actionItems.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
                         </ul>
                     </div>
                     <div class="task-expand">
